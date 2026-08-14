@@ -1,0 +1,5 @@
+# Streamlit settings for this project.
+# Disables usage-statistics telemetry and the first-run onboarding prompt.
+
+[browser]
+gatherUsageStats = false

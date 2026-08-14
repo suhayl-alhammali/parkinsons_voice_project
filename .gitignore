@@ -1,0 +1,18 @@
+# Virtual environment
+.venv/
+
+# Python caches
+__pycache__/
+*.pyc
+
+# Dataset audio (large; not committed)
+data/raw/mdvr_kcl/**
+!data/raw/mdvr_kcl/README_PLACE_DATASET_HERE.txt
+
+# Generated outputs
+data/processed/
+models/*.joblib
+
+# OS noise
+Thumbs.db
+.DS_Store
