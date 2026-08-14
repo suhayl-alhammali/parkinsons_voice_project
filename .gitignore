@@ -8,6 +8,7 @@ __pycache__/
 # Dataset audio (large; not committed)
 data/raw/mdvr_kcl/**
 !data/raw/mdvr_kcl/README_PLACE_DATASET_HERE.txt
+data/raw/italian_pvs/
 
 # Generated outputs
 data/processed/
