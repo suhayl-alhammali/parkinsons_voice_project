@@ -130,6 +130,22 @@ SCALER_FILE = MODELS_DIR / "scaler.joblib"
 PIPELINE_CONFIG_FILE = MODELS_DIR / "pipeline_config.json"
 
 # ---------------------------------------------------------------------------
+# Prototype result interpretation
+# ---------------------------------------------------------------------------
+
+# Model scores inside this band are reported as "inconclusive" instead of
+# a hard HC/PD call.  With subject-level balanced accuracy ~0.82, scores
+# near 0.5 carry little evidence either way; showing them as a class
+# label would overstate what the model knows (this matters most for
+# out-of-domain recordings, which often land near the boundary).
+UNCERTAIN_LOW = 0.35
+UNCERTAIN_HIGH = 0.65
+
+# Recording-condition heuristics (warnings only, never blocking).
+CLIPPING_WARN_FRACTION = 0.001   # >0.1% of samples at full scale
+SNR_WARN_DB = 15.0               # rough energy-percentile SNR estimate
+
+# ---------------------------------------------------------------------------
 # Prototype wording (mandatory cautious language)
 # ---------------------------------------------------------------------------
 

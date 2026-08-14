@@ -1,12 +1,35 @@
 # Voice Signal Analysis for Early Detection of Parkinson's Disease
 
 Biomedical engineering graduation project. The system analyzes raw voice
-recordings, extracts acoustic features (F0, jitter, shimmer, HNR, MFCC),
-trains classical machine learning models, and provides a simple screening
-prototype.
+recordings, extracts acoustic features (F0, jitter, shimmer, HNR, CPPS,
+pause statistics, MFCC + delta-MFCC), trains classical machine learning
+models with subject-independent validation, and provides a screening
+prototype (browser app + command line).
 
 > **Important:** This is a research screening prototype. It does **not**
 > diagnose Parkinson's disease. Any result requires clinical evaluation.
+
+## Results (subject-independent validation)
+
+Final model: Random Forest on 74 acoustic features extracted per
+10-second chunk and averaged per recording. Evaluated with
+StratifiedGroupKFold (5 folds, grouped by subject, 3 seeds) on MDVR-KCL
+(73 recordings, 37 subjects) — recordings of the same person are never
+split between training and test:
+
+| level | balanced accuracy | sensitivity (PD) | specificity (HC) | ROC-AUC |
+|:--|--:|--:|--:|--:|
+| per recording | 0.806 ± 0.013 | — | — | 0.86 |
+| per subject | 0.822 ± 0.032 | 0.77 | 0.87 | 0.864 |
+
+With a deliberately wrong split (random 10-s chunks, same recording in
+train and test) the same pipeline reports 0.909 — a +0.13 inflation from
+memorization. This is why grouped validation is non-negotiable
+(`reports/figures/validation_comparison.png`).
+
+Details: [reports/final_model_report.md](reports/final_model_report.md),
+[reports/experiments_report.md](reports/experiments_report.md),
+[reports/methodology.md](reports/methodology.md).
 
 ## Project structure
 
@@ -94,6 +117,7 @@ ChatGPT) before continuing to feature extraction.
 | Chunk features | `python scripts/build_segment_features.py` | `data/processed/segment_features.csv` |
 | Experiments | `python scripts/run_experiments.py` | `reports/experiments_report.md` |
 | **Train final model** | `python scripts/train_final_model.py` | `reports/final_model_report.md`, `models/model.joblib` |
+| Report figures | `python scripts/make_figures.py` | `reports/figures/*.png` |
 | Predict (CLI) | `python scripts/predict_file.py path\to\file.wav` | printed result |
 | Prototype app | `streamlit run app.py` | browser app |
 
@@ -110,10 +134,18 @@ environment active (the prompt starts with `(.venv)` — if not, run
 streamlit run app.py
 ```
 
-Success looks like: the terminal prints `Local URL: http://localhost:8501`
-and a browser page opens. Choose a WAV file with the **Browse files**
-button and wait ~10–20 seconds for the result. To stop the app, press
-`Ctrl+C` in the terminal.
+Success looks like: the terminal prints `Local URL: http://localhost:...`
+and a browser page opens. Two input modes:
+
+- **Upload a WAV file** — choose a file with the **Browse files** button.
+- **Record with the microphone** — for demonstrations. The app clearly
+  warns that microphone conditions differ from the training data, so this
+  mode mainly shows how the system handles unfamiliar recordings.
+
+Analysis takes about 1 minute for a 2-minute recording. Scores between
+0.35 and 0.65 are reported as **inconclusive** instead of a class label,
+and the app warns about short, noisy, clipped, or resampled recordings.
+To stop the app, press `Ctrl+C` in the terminal.
 
 **Command line:**
 

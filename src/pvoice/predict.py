@@ -56,7 +56,7 @@ class PipelineConfigError(Exception):
 @dataclass
 class PredictionResult:
     file: str
-    predicted_label: str          # "HC" or "PD"
+    predicted_label: str          # "HC", "PD", or "UNCERTAIN"
     headline: str                 # cautious one-sentence classification
     pd_score: float | None        # model score for the PD class (0..1)
     duration_s: float             # analyzed duration after trimming
@@ -65,6 +65,28 @@ class PredictionResult:
     warnings: list[str] = field(default_factory=list)
     disclaimer: str = config.DISCLAIMER
     label_explanation: str = config.LABEL_EXPLANATION
+
+
+def classify_score(pd_score: float | None, fallback_label: str) -> tuple[str, str]:
+    """Map a model score to (display label, headline sentence).
+
+    Scores inside the configured uncertain band become "UNCERTAIN" rather
+    than a hard class call; scores outside it keep the class the model
+    predicted.  When no score is available, the raw class prediction is
+    used as-is.
+    """
+    if pd_score is None:
+        label = fallback_label
+    elif config.UNCERTAIN_LOW <= pd_score <= config.UNCERTAIN_HIGH:
+        return ("UNCERTAIN",
+                "The research model could not clearly assign this "
+                "recording to either class (the score is in the "
+                "inconclusive middle range).")
+    else:
+        label = "PD" if pd_score > config.UNCERTAIN_HIGH else "HC"
+    return (label,
+            "The acoustic pattern was classified by the research model as "
+            f"closer to the {label} class.")
 
 
 def validate_audio_file(audio_path: str | Path) -> None:
@@ -175,9 +197,51 @@ def current_pipeline_config() -> dict:
     }
 
 
-def _headline(label: str) -> str:
-    return ("The acoustic pattern was classified by the research model as "
-            f"closer to the {label} class.")
+def recording_condition_warnings(audio_path: str | Path,
+                                 original_sample_rate: int) -> list[str]:
+    """Heuristic checks that the recording resembles training conditions.
+
+    These NEVER block a prediction; they only attach plain-language
+    warnings, because condition mismatch (microphone, room, noise) is the
+    main reason results on new recordings are unreliable.
+    """
+    warnings: list[str] = []
+    if original_sample_rate != config.SAMPLE_RATE:
+        warnings.append(
+            f"the recording's sample rate ({original_sample_rate} Hz) "
+            f"differs from the training recordings ({config.SAMPLE_RATE} "
+            "Hz); it was resampled, which can subtly change the features")
+    try:
+        raw, _sr = sf.read(str(audio_path), dtype="float32", always_2d=True)
+        mono = raw.mean(axis=1)
+        # Clipping: samples pinned at (or beyond) full scale.
+        clipped = float(np.mean(np.abs(mono) >= 0.999))
+        if clipped > config.CLIPPING_WARN_FRACTION:
+            warnings.append(
+                f"about {clipped:.1%} of the recording is clipped "
+                "(microphone too loud/too close); distortion inflates the "
+                "voice-quality measurements")
+        # Rough SNR: compare loud-frame energy (speech) with quiet-frame
+        # energy (background) using RMS percentiles over 50 ms frames.
+        frame = int(0.05 * config.SAMPLE_RATE)
+        n = (len(mono) // frame) * frame
+        if n >= frame * 20:
+            rms = np.sqrt(np.mean(
+                mono[:n].reshape(-1, frame) ** 2, axis=1))
+            rms = rms[rms > 0]
+            if rms.size >= 20:
+                snr_db = 20 * np.log10(np.percentile(rms, 90)
+                                       / np.percentile(rms, 10))
+                if snr_db < config.SNR_WARN_DB:
+                    warnings.append(
+                        "the recording appears noisy (little difference "
+                        "between speech and background loudness); "
+                        "background noise pushes results toward "
+                        "unreliability")
+    except Exception:
+        # Condition checks are best-effort; never break a prediction.
+        pass
+    return warnings
 
 
 def predict_file(audio_path: str | Path,
@@ -207,15 +271,18 @@ def predict_file(audio_path: str | Path,
     X = pd.DataFrame([mean_features], columns=feature_names())
 
     predicted = int(model.predict(X)[0])
-    label = config.LABEL_NAMES[predicted]
     score = None
     if hasattr(model, "predict_proba"):
         score = float(model.predict_proba(X)[0, 1])
+    label, headline = classify_score(score, config.LABEL_NAMES[predicted])
+
+    warnings.extend(recording_condition_warnings(
+        audio_path, audio.original_sample_rate))
 
     return PredictionResult(
         file=str(audio_path),
         predicted_label=label,
-        headline=_headline(label),
+        headline=headline,
         pd_score=score,
         duration_s=audio.duration_s,
         original_duration_s=audio.original_duration_s,

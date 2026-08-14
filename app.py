@@ -58,7 +58,29 @@ except PipelineConfigError as exc:
     st.error(str(exc))
     st.stop()
 
-uploaded = st.file_uploader("Choose a WAV audio file", type=["wav"])
+source = st.radio(
+    "How do you want to provide the recording?",
+    ["Upload a WAV file", "Record with the microphone"],
+    horizontal=True,
+)
+
+uploaded = None
+mic_used = False
+if source == "Upload a WAV file":
+    uploaded = st.file_uploader("Choose a WAV audio file", type=["wav"])
+else:
+    st.info(
+        "Microphone note: the research model was trained on recordings "
+        "made with one specific phone in one quiet room. Your microphone, "
+        "room, and language are different, so this mode mainly "
+        "demonstrates how the system handles unfamiliar recordings - "
+        "expect an inconclusive or unreliable result. Speak continuously "
+        "for at least 30-60 seconds for the most stable measurements."
+    )
+    recorded = st.audio_input("Record your voice, then press stop")
+    if recorded is not None:
+        uploaded = recorded
+        mic_used = True
 
 if uploaded is not None:
     # Streamlit keeps uploads in memory; the pipeline needs a real file
@@ -66,8 +88,9 @@ if uploaded is not None:
     # the finally-block below.  Nothing the user uploads is kept.
     tmp_path: Path | None = None
     try:
+        suffix = Path(getattr(uploaded, "name", "recording.wav")).suffix or ".wav"
         with tempfile.NamedTemporaryFile(
-            suffix=Path(uploaded.name).suffix, delete=False
+            suffix=suffix, delete=False
         ) as tmp:
             tmp.write(uploaded.getvalue())
             tmp_path = Path(tmp.name)
@@ -91,20 +114,31 @@ if uploaded is not None:
     else:
         st.subheader("File information")
         st.markdown(
-            f"- **File:** {uploaded.name}\n"
+            f"- **File:** {getattr(uploaded, 'name', 'microphone recording')}\n"
             f"- **Duration:** {result.original_duration_s:.1f} s "
             f"(analyzed after silence trimming: {result.duration_s:.1f} s)\n"
             f"- **Original sample rate:** {result.original_sample_rate} Hz"
         )
 
         st.subheader("Research model result")
-        st.markdown(f"**{result.headline}**")
+        if result.predicted_label == "UNCERTAIN":
+            st.info(f"**{result.headline}**")
+        else:
+            st.markdown(f"**{result.headline}**")
         if result.pd_score is not None:
             st.markdown(
                 f"Model score for the PD class: **{result.pd_score:.2f}** "
-                "(0 = closer to HC class, 1 = closer to PD class). This is "
-                "a property of the research model, **not** a person's "
-                "medical risk or probability of disease."
+                "(0 = closer to HC class, 1 = closer to PD class; scores "
+                f"between {config.UNCERTAIN_LOW:.2f} and "
+                f"{config.UNCERTAIN_HIGH:.2f} are reported as "
+                "inconclusive). This is a property of the research model, "
+                "**not** a person's medical risk or probability of disease."
+            )
+        if mic_used:
+            st.warning(
+                "This was a microphone recording: its conditions differ "
+                "from the training data, so this result mainly shows how "
+                "the system reacts to unfamiliar recordings."
             )
         for warning in result.warnings:
             st.warning(f"Note about this recording: {warning}")

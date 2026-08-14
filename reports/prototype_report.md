@@ -78,6 +78,27 @@ Functional end-to-end checks:
   server errors. (The upload path itself is exercised by the automated
   tests, which call the same `predict_file` function the app calls.)
 
+## Additions after the accuracy-improvement phase (2026-08-15)
+
+- **Inconclusive band**: model scores in 0.35-0.65 are displayed as
+  "the model could not clearly assign this recording to either class"
+  instead of a hard HC/PD call. Rationale: near the decision boundary the
+  evidence is weak, and out-of-domain recordings (other microphones,
+  languages, rooms) often land exactly there; a hard label would
+  overstate certainty. The out-of-fold score distribution shows the class
+  overlap concentrated in this band (figures/score_distribution.png).
+- **Recording-condition warnings** (never blocking): sample rate differs
+  from training (resampled), audible clipping (>0.1% full-scale samples),
+  low estimated signal-to-noise ratio (<15 dB), plus the existing
+  short-recording warning.
+- **Microphone mode** (approved by Hussein): the app can record directly.
+  It is framed on-screen as an out-of-domain demonstration - the model
+  was trained on one phone in one room, so live recordings mainly show
+  the uncertainty handling. Recorded audio follows the exact same
+  temporary-file path as uploads and is deleted after processing.
+- Tests extended: uncertain-band boundary tests (0.349/0.35/0.5/0.65/
+  0.651, and the no-score fallback) all pass.
+
 ## Limitations
 
 - The model was trained on ~2-minute continuous-speech recordings from one

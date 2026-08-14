@@ -50,15 +50,36 @@ def test_successful_prediction(tmp_dir: Path) -> None:
     wav = tmp_dir / "voice.wav"
     _write_tone(wav)
     result = predict_file(wav)
-    assert result.predicted_label in ("HC", "PD")
-    assert result.headline.startswith(
-        "The acoustic pattern was classified by the research model as closer to")
+    assert result.predicted_label in ("HC", "PD", "UNCERTAIN")
+    if result.predicted_label == "UNCERTAIN":
+        assert "could not clearly assign" in result.headline
+    else:
+        assert result.headline.startswith(
+            "The acoustic pattern was classified by the research model "
+            "as closer to")
     assert result.pd_score is None or 0.0 <= result.pd_score <= 1.0
     assert "not a medical diagnostic tool" in result.disclaimer
     # 5 s recording is far below the ~2-minute training recordings.
     assert any("less reliable" in w for w in result.warnings)
     print("test_successful_prediction: PASS "
           f"(label={result.predicted_label}, score={result.pd_score:.2f})")
+
+
+def test_uncertain_band() -> None:
+    from pvoice.predict import classify_score
+
+    assert classify_score(0.20, "HC")[0] == "HC"
+    assert classify_score(0.80, "HC")[0] == "PD"
+    for score in (0.35, 0.50, 0.65):
+        label, headline = classify_score(score, "PD")
+        assert label == "UNCERTAIN"
+        assert "could not clearly assign" in headline
+    # Just outside the band -> hard call again.
+    assert classify_score(0.349, "PD")[0] == "HC"
+    assert classify_score(0.651, "HC")[0] == "PD"
+    # No probability available -> fall back to the model's class.
+    assert classify_score(None, "PD")[0] == "PD"
+    print("test_uncertain_band: PASS")
 
 
 def test_config_mismatch(tmp_dir: Path) -> None:
@@ -139,6 +160,7 @@ if __name__ == "__main__":
     with tempfile.TemporaryDirectory() as tmp:
         tmp_dir = Path(tmp)
         test_successful_prediction(tmp_dir)
+        test_uncertain_band()
         test_config_mismatch(tmp_dir)
         test_config_missing(tmp_dir)
         test_feature_list_mismatch(tmp_dir)
