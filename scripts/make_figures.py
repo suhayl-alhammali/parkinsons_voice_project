@@ -206,6 +206,44 @@ def fig_score_distribution() -> None:
     plt.close(fig)
 
 
+def fig_external_scores() -> None:
+    """Speaker-level score distributions on the Italian external set."""
+    ext = pd.read_csv(config.PROCESSED_DATA_DIR / "external_predictions.csv")
+    speakers = (ext.groupby("speaker")
+                .agg(label=("label", "first"),
+                     age_group=("age_group", "first"),
+                     prob_pd=("prob_pd", "mean"))
+                .reset_index())
+    groups = [("HC", "elderly", COLOR_HC, "elderly HC"),
+              ("PD", "elderly", COLOR_PD, "PD"),
+              ("HC", "young", COLOR_NEUTRAL, "young HC")]
+
+    fig, ax = plt.subplots(figsize=(6.6, 4.2))
+    ax.axvspan(config.UNCERTAIN_LOW, config.UNCERTAIN_HIGH,
+               color=COLOR_NEUTRAL, alpha=0.15, zorder=0)
+    rng = np.random.default_rng(0)
+    for i, (label, age, color, name) in enumerate(groups):
+        part = speakers[(speakers["label"] == label)
+                        & (speakers["age_group"] == age)]
+        y = np.full(len(part), i) + rng.uniform(-0.13, 0.13, len(part))
+        ax.scatter(part["prob_pd"], y, s=42, color=color, alpha=0.85,
+                   edgecolors="white", linewidths=0.7, label=name)
+    ax.text((config.UNCERTAIN_LOW + config.UNCERTAIN_HIGH) / 2, 2.55,
+            "inconclusive band", ha="center", fontsize=8, color="#555")
+    ax.axvline(0.5, linestyle=":", color=COLOR_NEUTRAL, linewidth=1)
+    ax.set_yticks(range(len(groups)),
+                  [name for _, _, _, name in groups])
+    ax.set_xlim(0, 1)
+    ax.set_ylim(-0.5, 2.8)
+    ax.set_xlabel("Model score for the PD class (per speaker, frozen model)")
+    ax.set_title("External validation (Italian dataset):\n"
+                 "most out-of-domain speakers fall in the inconclusive band")
+    ax.spines[["top", "right", "left"]].set_visible(False)
+    fig.tight_layout()
+    fig.savefig(FIG / "external_scores.png", dpi=200)
+    plt.close(fig)
+
+
 def main() -> int:
     for path in (config.MODEL_FILE, FINAL_OOF, SEGMENT_TABLE):
         if not path.exists():
@@ -223,7 +261,12 @@ def main() -> int:
     fig_validation_comparison(seg)
     print("Score distribution...")
     fig_score_distribution()
-    print(f"\nSaved 4 figures to {FIG}")
+    n = 4
+    if (config.PROCESSED_DATA_DIR / "external_predictions.csv").exists():
+        print("External validation scores...")
+        fig_external_scores()
+        n = 5
+    print(f"\nSaved {n} figures to {FIG}")
     return 0
 
 
