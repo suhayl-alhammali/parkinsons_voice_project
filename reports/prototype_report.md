@@ -29,9 +29,14 @@ feature list):
    messages: missing file, empty (0-byte) file, unreadable/corrupted audio,
    file with no samples, recording shorter than 1 second, silent recording.
 3. The standard pipeline runs: mono, 44.1 kHz, DC removal, edge silence
-   trimming, peak normalization, then F0/jitter/shimmer/HNR (Praat) and
-   MFCC statistics (librosa) — identical to training.
-4. The saved SVM-RBF pipeline (median imputer + scaler + classifier)
+   trimming, peak normalization, then splitting into 10-second chunks and
+   extracting the 74 extended features per chunk (Praat: F0, jitter,
+   shimmer, HNR, CPPS; librosa: MFCC and delta-MFCC; plus pause
+   statistics), averaged over chunks — identical to training.
+   *(Steps 3-4 describe the pipeline as it stands after the
+   accuracy-improvement phase; at the time of Phase 5 it was the 43-feature
+   whole-recording version with an SVM-RBF model.)*
+4. The saved Random Forest pipeline (median imputer + scaler + classifier)
    produces the class and a PD-class score.
 5. Recordings much shorter than the ~2-minute training recordings get a
    reliability warning attached (threshold: 10 s).
@@ -107,8 +112,11 @@ Functional end-to-end checks:
   short recordings only get a warning, other mismatches are undetectable.
 - The subject-level evaluation (Phase 4) applies to the dataset, not to any
   individual future user.
-- WAV input only in the app (deliberate, to keep decoding predictable).
-- Live microphone recording is out of scope (deferred per project rules).
+- WAV input only for file upload in the app (deliberate, to keep decoding
+  predictable).
+- Live microphone recording was out of scope during Phase 5; it was later
+  approved and added (see the additions section above), but only as an
+  explicitly-labelled out-of-domain demonstration.
 
 ## Files created or updated in Phase 5
 
