@@ -327,10 +327,13 @@ implementation recomputes the intersection of training and test
 subjects and halts the program if it is non-empty:
 
 \begin{verbatim}
-overlap = set(groups[train_idx]) & set(groups[test_idx])
+train_subjects = set(groups.iloc[train_idx])
+test_subjects = set(groups.iloc[test_idx])
+overlap = train_subjects & test_subjects
 if overlap:
-    raise RuntimeError(f"LEAKAGE: subjects {overlap} "
-                        "appear in train AND test")
+    raise RuntimeError(
+        f"LEAKAGE: subjects {overlap} appear in train AND test"
+    )
 \end{verbatim}
 
 \noindent
@@ -538,8 +541,9 @@ conditions depart from those of the training corpus: a native sample
 rate different from 44100~Hz (the file is resampled, which can shift
 spectral features); audible clipping (more than 0.1\% of samples at
 full scale); an estimated Signal-to-Noise Ratio (SNR) below 15~dB,
-computed from the ratio of the 90th to the 10th percentile of
-Root Mean Square (RMS) frame energies over 50~ms frames; and analysed
+computed as $20\log_{10}$ of the ratio between the 90th and 10th
+percentiles of Root Mean Square (RMS) frame levels over 50~ms frames;
+and analysed
 durations under 10~seconds, far below the 70--220~s training
 recordings. Microphone mode carries an additional standing notice that
 live recordings differ from the training conditions and that the mode

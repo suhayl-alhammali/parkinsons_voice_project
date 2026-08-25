@@ -1,3 +1,591 @@
-%============ Chapter4.tex ===================
+%============ Chapter4.tex — Results and Discussion ===================
 \chapter{Results and Discussion}
-	extit{[This chapter will be written in a later part, after the preceding part is approved.]}
+
+\section{Overview}
+
+This chapter reports the outcome of every stage of the methodology, in
+the order established in Chapter~3: dataset inspection (Section~4.2),
+feature extraction and validation (4.3), baseline modelling (4.4), the
+pre-declared model-selection study (4.5), the final model (4.6), its
+interpretation through feature importance (4.7), the empirical
+demonstration of the validation-design effect (4.8), external
+validation (4.9), and prototype verification (4.10). Section~4.11
+discusses the findings as a whole, and Section~4.12 states the
+limitations and the ethical constraints that govern the system's use
+and wording. All classification results in this chapter were obtained
+under the subject-independent protocol of Section~3.8; the single
+deliberate exception, clearly marked, is the leaky split of
+Section~4.8, computed to demonstrate what the protocol prevents.
+
+\section{Dataset Inspection Results}
+
+The automated inspection of the MDVR-KCL corpus confirmed 73 readable
+recordings from 37 subjects (21 HC, 16 PD), organized in the structure
+of Table~3.1: all files mono WAV at 44100~Hz, with durations from
+73.0 to 220.6~s (median 141.3~s, mean 141.4~s). Every integrity check
+passed: no corrupt, empty, silent, or very short files; no duplicate
+audio content by MD5 comparison; no label conflicts between folder and
+filename; no file without a parseable subject identifier; and no
+subject appearing in both classes. Subject-independent validation was
+therefore confirmed feasible, and no file had to be excluded.
+
+The inspection also quantified the corpus' structural risks: 37
+subjects is a small sample; the two recordings of each subject share
+one recording session and device; and the class ratio is 42:31 at the
+recording level. These findings directly motivated three methodological
+decisions already described --- grouped validation, balanced class
+weighting with balanced accuracy as the primary metric, and the
+reporting of variability across folds and seeds.
+
+\section{Feature Extraction and Validation Results}
+
+Chunk-level extraction produced 1001 chunks (7--22 per recording) with
+all 74 features, with zero extraction failures. Automated validation
+of the feature tables found no infinite values, no constant
+(information-free) features, and no duplicated feature vectors. At the
+recording level the table contains no missing values; at the chunk
+level, a small number of chunks with too little stable voicing yielded
+missing perturbation values (at most 16 of 1001 chunks for any single
+feature), left as missing for fold-internal imputation as specified in
+Section~3.7.
+
+One systematic observation required interpretation rather than
+correction: on some recordings the minimum of the F0 track lies
+marginally below the 75~Hz search floor (values down to about
+74.94~Hz). This is normal behaviour of the pitch tracker, which
+interpolates between analysis frames \cite{boersma1993}; the
+validation tolerances were set accordingly, and no data were altered.
+
+As a physiological sanity check before any modelling, class means of
+key features were compared. The PD group showed higher mean local
+jitter (0.025 vs.\ 0.020), higher mean local shimmer (0.101 vs.\
+0.085), and slightly lower mean HNR (13.6 vs.\ 13.9~dB) than the HC
+group --- the direction expected from the hypokinetic dysarthria
+literature reviewed in Section~2.3. The HC group also showed a higher
+mean F0 (about 180 vs.\ 154~Hz), a difference that could reflect the
+groups' sex composition rather than the disease; this concern is
+addressed quantitatively in Section~4.4.
+
+\section{Baseline Modelling Results}
+
+Table~\ref{tab:phase4} reports the baseline phase: the 43-feature
+whole-recording representation (variant V0) evaluated for all five
+models under the full protocol. Every learned model clearly exceeds the
+majority-class baseline, whose balanced accuracy of exactly 0.5 ---
+despite 0.575 plain accuracy --- illustrates why balanced accuracy is
+the primary metric. The SVM performed best (subject-level balanced
+accuracy 0.780) and was provisionally selected at this stage by the
+robust-score rule (mean minus standard deviation of fold-level
+balanced accuracy).
+
+\begin{table}[htb]
+\centering
+\caption{Baseline results (variant V0: 43 features per whole
+recording), subject-independent validation. Balanced accuracy (bal.\
+acc.) is shown at recording and subject level (3-seed mean);
+sensitivity, specificity, and AUC at recording level.}
+\label{tab:phase4}
+\small
+\begin{tabular}{lccccc}
+\toprule
+Model & \makecell[c]{Bal.\ acc.\\(recording)} &
+\makecell[c]{Bal.\ acc.\\(subject)} & Sensitivity & Specificity & AUC \\
+\midrule
+Majority baseline   & 0.500 & 0.500 & 0.000 & 1.000 & 0.500 \\
+Logistic regression & 0.651 & 0.704 & 0.516 & 0.786 & 0.717 \\
+SVM (RBF)           & 0.761 & 0.780 & 0.774 & 0.762 & 0.741 \\
+Random Forest       & 0.725 & 0.725 & 0.645 & 0.833 & 0.775 \\
+MLP                 & 0.671 & 0.686 & 0.581 & 0.762 & 0.736 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Confounder Check: Absolute Pitch and Speaker Sex}
+
+Because the corpus carries no verified per-subject sex metadata, and
+because the observed between-group F0 difference (Section~4.3) could
+reflect group composition, the entire evaluation was repeated with the
+four absolute-pitch features (mean, median, minimum, and maximum F0)
+removed. Table~\ref{tab:ablation} shows the result. The SVM and
+logistic regression were unaffected or slightly improved --- evidence
+that their decisions rest on the perturbation, cepstral, and spectral
+features rather than on absolute pitch. The MLP collapsed from 0.671
+to 0.526, barely above chance, revealing that it had been relying
+substantially on the potentially sex-linked features; it was therefore
+excluded from all subsequent modelling.
+
+\begin{table}[htb]
+\centering
+\caption{Ablation of the four absolute-F0 features
+(recording-level balanced accuracy, 3-seed mean).}
+\label{tab:ablation}
+\begin{tabular}{lcc}
+\toprule
+Model & All features & Without absolute F0 \\
+\midrule
+Logistic regression & 0.651 & 0.699 \\
+SVM (RBF)           & 0.768 & 0.780 \\
+Random Forest       & 0.739 & 0.707 \\
+MLP                 & 0.671 & 0.526 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Model-Selection Study}
+
+Table~\ref{tab:experiments} reports all 19 configurations evaluated
+under the pre-declared protocol of Section~3.9 --- every variant of
+Table~3.3 crossed with the remaining models, plus the tuned and
+ensemble variants. None reached the 0.95 investigation threshold.
+
+\begin{table}[htb]
+\centering
+\caption{Complete results of the model-selection study. Primary metric
+in bold column: subject-level balanced accuracy, mean $\pm$ standard
+deviation over three seeds. AUC at subject level. LR = logistic
+regression; RF = Random Forest.}
+\label{tab:experiments}
+\small
+\begin{tabular}{llccc}
+\toprule
+Variant & Model & \textbf{Bal.\ acc.\ (subject)} &
+Bal.\ acc.\ (recording) & AUC (subject) \\
+\midrule
+V0 & LR        & 0.704 $\pm$ 0.029 & 0.685 & 0.765 \\
+V0 & SVM       & 0.780 $\pm$ 0.019 & 0.761 & 0.789 \\
+V0 & RF        & 0.725 $\pm$ 0.019 & 0.725 & 0.808 \\
+\midrule
+V1 & LR        & 0.746 $\pm$ 0.029 & 0.677 & 0.788 \\
+V1 & SVM       & 0.816 $\pm$ 0.026 & 0.792 & 0.841 \\
+\textbf{V1} & \textbf{RF} & \textbf{0.822 $\pm$ 0.032} & \textbf{0.806} & \textbf{0.864} \\
+\midrule
+V2 & LR        & 0.769 $\pm$ 0.042 & 0.770 & 0.841 \\
+V2 & SVM       & 0.817 $\pm$ 0.010 & 0.781 & 0.826 \\
+V2 & RF        & 0.780 $\pm$ 0.011 & 0.750 & 0.802 \\
+\midrule
+V3 & LR        & 0.772 $\pm$ 0.059 & 0.752 & 0.817 \\
+V3 & SVM       & 0.793 $\pm$ 0.024 & 0.757 & 0.820 \\
+V3 & RF        & 0.780 $\pm$ 0.011 & 0.775 & 0.820 \\
+\midrule
+V4 & LR (tuned)  & 0.772 $\pm$ 0.028 & 0.751 & 0.829 \\
+V4 & SVM (tuned) & 0.775 $\pm$ 0.043 & 0.755 & 0.815 \\
+V4 & RF (tuned)  & 0.814 $\pm$ 0.024 & 0.810 & 0.870 \\
+\midrule
+V5 & SVM+RF ensemble & 0.840 $\pm$ 0.026 & 0.800 & 0.853 \\
+\midrule
+V6 & LR        & 0.656 $\pm$ 0.027 & 0.653 & --- \\
+V6 & SVM       & 0.824 $\pm$ 0.015 & 0.786 & --- \\
+V6 & RF        & 0.806 $\pm$ 0.023 & 0.794 & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Applying the pre-declared rules, the adopted configuration is
+\textbf{V1 with the Random Forest}: 74 extended features extracted per
+10-second chunk and averaged per recording, classified by a
+default-settings RF, reaching a subject-level balanced accuracy of
+$0.822 \pm 0.032$ --- an improvement of $+0.042$ over the V0 baseline
+SVM. Three configurations with equal or higher point estimates were
+rejected because none cleared the $+0.02$ adoption margin over this
+simpler winner:
+
+\begin{itemize}
+  \item the tuned-SVM+RF ensemble (V5), at 0.840, exceeds it by only
+        $+0.018$ while adding nested tuning and a second model;
+  \item the mean-and-standard-deviation summary with SVM (V6), at
+        0.824, exceeds it by $+0.002$ while doubling the feature count
+        to 148;
+  \item the tuned RF (V4), at 0.814, does not exceed the untuned RF at
+        all.
+\end{itemize}
+
+These rejections are a designed outcome, not a missed opportunity:
+with seed-to-seed variability of about $\pm0.03$ at this sample size,
+differences below the margin are indistinguishable from noise, and
+selecting the most complex of several statistically tied variants
+would fit the validation procedure rather than the problem. The gains
+that survived the margin came from the data representation --- the
+continuous-speech features and chunk averaging --- while
+hyperparameter tuning contributed nothing, a pattern consistent with
+the small sample size.
+
+\section{Final Model Performance}
+
+Table~\ref{tab:final} details the adopted configuration per seed.
+Averaged over seeds, the final model attains a subject-level balanced
+accuracy of $0.822 \pm 0.032$, sensitivity of 0.771, specificity of
+0.873, and a subject-level AUC of 0.864; at recording level, balanced
+accuracy is $0.806 \pm 0.013$.
+
+\begin{table}[htb]
+\centering
+\caption{Final model (V1, Random Forest) per seed; all values
+subject-independent. Sensitivity, specificity, and AUC at subject
+level.}
+\label{tab:final}
+\small
+\begin{tabular}{cccccc}
+\toprule
+Seed & \makecell[c]{Bal.\ acc.\\(recording)} &
+\makecell[c]{Bal.\ acc.\\(subject)} & Sensitivity & Specificity & AUC \\
+\midrule
+42   & 0.816 & 0.780 & 0.750 & 0.810 & 0.872 \\
+7    & 0.816 & 0.827 & 0.750 & 0.905 & 0.826 \\
+2025 & 0.788 & 0.859 & 0.812 & 0.905 & 0.893 \\
+\midrule
+Mean & 0.806 & 0.822 & 0.771 & 0.873 & 0.864 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The pooled recording-level confusion matrix for seed 42 is: of 42 HC
+recordings, 36 correctly cleared and 6 falsely flagged; of 31 PD
+recordings, 24 correctly identified and 7 missed. In screening terms,
+the model catches roughly three of four PD cases while falsely
+flagging roughly one of eight healthy recordings.
+
+Figure~\ref{fig:roc} shows the Receiver Operating Characteristic of
+the out-of-fold scores (seed 42) at both evaluation levels, with AUC
+0.82 at recording level and 0.87 at subject level; subject-level
+aggregation improves ranking, as averaging two recordings suppresses
+single-recording noise. Figure~\ref{fig:scoredist} shows the
+out-of-fold score distributions by true class. The two classes
+separate visibly, but their overlap concentrates between roughly 0.35
+and 0.65 --- the empirical basis for the prototype's inconclusive band
+(Section~3.11.2).
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.62\textwidth]{roc_curve.png}
+\caption{Receiver Operating Characteristic of the final model's
+out-of-fold predictions (seed 42), at recording and subject level.}
+\label{fig:roc}
+\end{figure}
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.75\textwidth]{score_distribution.png}
+\caption{Out-of-fold score distributions by true class (final model,
+seed 42, per recording). The shaded region marks the score range
+reported as inconclusive by the prototype.}
+\label{fig:scoredist}
+\end{figure}
+
+\section{Feature Importance and Interpretability}
+
+Figure~\ref{fig:importance} shows the fifteen highest-ranked features
+of the final Random Forest by mean decrease in impurity. The single
+most important feature is the F0 range (importance 0.069), followed by
+the F0 maximum (0.058) --- direct acoustic correlates of the monotone,
+prosodically flattened speech that clinical descriptions identify as a
+hallmark of hypokinetic dysarthria \cite{darley1969,ho1999}, and
+consistent with the discriminative power of F0 variability reported in
+early PD \cite{rusz2011}. Variability measures of the spectral
+envelope and its dynamics (standard deviations of MFCC and delta-MFCC
+coefficients, e.g.\ 0.054 and 0.036 for the second MFCC and
+delta-MFCC) outrank the corresponding means, consistent with reduced
+articulatory movement rather than a shifted average spectrum. Absolute
+jitter (0.027) also appears among the leading features. The model's
+decisions therefore rest on acoustic quantities whose clinical
+interpretation is established --- the explainability objective of
+Section~1.4.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{feature_importance.png}
+\caption{The fifteen most important features of the final Random
+Forest (mean decrease in impurity).}
+\label{fig:importance}
+\end{figure}
+
+\section{Effect of Validation Design: A Controlled Demonstration}
+
+To quantify the leakage mechanism discussed in Sections~2.6 and 3.8 on
+this project's own data, one controlled comparison was run: the
+identical chunk-level RF pipeline, with identical aggregation of chunk
+scores to recording level, evaluated twice --- once with the correct
+subject-grouped split and once with a random split of the 10-second
+chunks, in which chunks of the same recording (and speaker) fall on
+both sides. Figure~\ref{fig:leaky} shows the outcome: 0.775 balanced
+accuracy under the correct split against 0.909 under the wrong one.
+The $+0.13$ difference is produced entirely by the split; it measures
+the model's ability to recognize recordings and speakers it has partly
+seen, not the disease.
+
+For completeness, the same comparison at the \emph{recording} level
+showed almost no inflation on this corpus (0.807 under a random
+recording split against 0.806 grouped), because a subject's two
+recordings come from different tasks and are acoustically dissimilar.
+The severe leakage arises specifically when near-identical material
+--- chunks of one recording --- straddles the split, which is exactly
+the situation created by window-level splitting of segmented audio, a
+common design in the literature \cite{saeb2017}. Reported accuracies
+above 0.9 on small corpora should therefore be read with this
+mechanism in mind, including this project's own leaky figure of 0.909,
+which is reported here only as a demonstration and is not a result of
+this work.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.62\textwidth]{validation_comparison.png}
+\caption{The same data, pipeline, and model under two split designs.
+The inflated figure measures memorization of recording identity, not
+detection (deliberately wrong split; demonstration only).}
+\label{fig:leaky}
+\end{figure}
+
+\section{External Validation Results}
+
+\subsection{Inspection and the Sample-Rate Confound}
+
+Inspection of the mirrored Italian corpus (Section~3.10) confirmed 831
+readable mono WAV files from 61 speakers (15 young HC, 22 elderly HC,
+24 PD) with zero corrupt files, and uncovered one critical structural
+fact: all 160 files sampled at 44100~Hz belong to the PD group, while
+every HC file is sampled at 16000~Hz. Since a 16~kHz recording cannot
+contain energy above 8~kHz while a 44.1~kHz recording can, a model
+using full-band spectral features could partly separate the groups by
+recording bandwidth alone --- a channel artefact unrelated to any
+speaker's health. The bandwidth-harmonization step of Section~3.10
+(downsampling every evaluated file to 16~kHz before the standard
+pipeline) was adopted for precisely this reason, and the result below
+would not be interpretable without it.
+
+\subsection{Results}
+
+Applying the inclusion rule admitted 216 recordings ($\geq$30~s) from
+all 61 speakers, with zero extraction failures.
+Table~\ref{tab:external} contrasts the frozen model's external
+performance with its internal performance. On the age-fair headline
+comparison (22 elderly HC vs.\ 24 PD speakers), the model attains a
+speaker-level balanced accuracy of 0.629 and an AUC of 0.701; 13 of 22
+elderly HC speakers were correctly cleared (9 falsely flagged), and 16
+of 24 PD speakers were caught (8 missed).
+
+\begin{table}[htb]
+\centering
+\caption{Internal versus external performance of the identical frozen
+model (subject/speaker level). The external evaluation is cross-corpus
+and cross-language, with no adaptation.}
+\label{tab:external}
+\begin{tabular}{lcc}
+\toprule
+Metric & Internal (MDVR-KCL) & External (Italian, elderly HC vs.\ PD) \\
+\midrule
+Balanced accuracy & 0.822 & 0.629 \\
+Sensitivity       & 0.771 & 0.667 \\
+Specificity       & 0.873 & 0.591 \\
+AUC               & 0.864 & 0.701 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two secondary observations carry as much information as the headline
+numbers. First, \textbf{the inconclusive band absorbed most of the
+out-of-domain material}: 71.3\% of the 216 recordings scored inside
+$[0.35, 0.65]$, including the speaker-level scores of \emph{all 22}
+elderly HC speakers (100\%; PD speakers: 62.5\%). Deployed as
+designed, the prototype would answer ``inconclusive'' rather than
+confidently mislabel foreign healthy speakers.
+Figure~\ref{fig:external} shows every speaker's score.
+
+Second, \textbf{the young healthy group scored anomalously high}: mean
+PD score 0.626, \emph{above} the actual PD group's 0.566 (elderly HC:
+0.489), with only 3 of 15 young speakers classified HC. Healthy young
+voices cannot plausibly be more parkinsonian than patients' voices;
+the anomaly demonstrates that under domain shift the score responds
+substantially to recording channel and speaking style rather than to
+disease. It is reported prominently here because it is direct
+empirical support for the cautious interface design --- and a caution
+against interpreting any out-of-domain score clinically.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{external_scores.png}
+\caption{External validation: speaker-level scores of the frozen model
+on the Italian corpus, by group. The shaded region is the inconclusive
+band.}
+\label{fig:external}
+\end{figure}
+
+\subsection{Interpretation}
+
+The external result quantifies generalization rather than assuming
+it. An AUC of 0.701 across corpus, language, microphone, and
+bandwidth --- with zero adaptation --- indicates that a genuine,
+transferable acoustic signal survives: given one random PD and one
+random elderly-HC speaker, the model ranks the patient higher 70\% of
+the time. At the same time, hard classification at the fixed 0.5
+threshold degrades sharply (specificity 0.591), so the model is not
+usable as a classifier outside its training domain --- which the
+prototype communicates by design. Because bandwidth harmonization
+removes spectral content the model saw in training, absolute scores
+shift, and the threshold-free AUC is the most meaningful external
+number. The gap between 0.822 and 0.629 is this project's measured
+price of domain shift; Chapter~5 returns to what would be required to
+reduce it.
+
+\section{Prototype Verification}
+
+The prototype was verified at three levels. First, automated tests of
+the shared prediction path all pass: correct end-to-end prediction on
+synthetic audio; refusal to predict under a modified, missing, or
+truncated pipeline contract; rejection, with plain-language messages,
+of missing, empty, corrupted, silent, and too-short audio files; and
+exact behaviour of the inconclusive band at its boundaries (scores of
+0.349 and 0.651 classified, 0.35, 0.50, and 0.65 inconclusive).
+Second, the browser interface was exercised manually: both input
+modes render and complete analyses without server errors, and the
+microphone mode displays its out-of-domain notice. Third, an
+end-to-end command-line run on a corpus recording completed the full
+pipeline in about one minute for a 2.5-minute file --- CPPS extraction
+dominating the runtime --- and produced the following output
+(functional demonstration only; the file belongs to the training
+corpus, so the run verifies the pipeline, not accuracy):
+
+{\footnotesize
+\begin{verbatim}
+================================================================
+RESEARCH MODEL RESULT (non-diagnostic)
+================================================================
+File: data\raw\mdvr_kcl\ReadText\HC\ID00_hc_0_0_0.wav
+Duration: 151.1 s (analyzed after trimming: 149.3 s),
+original sample rate 44100 Hz
+
+The acoustic pattern was classified by the research model as
+closer to the HC class.
+Model score for the PD class: 0.17 (0 = closer to HC,
+1 = closer to PD).
+This score is a property of the research model, NOT a
+person's medical risk.
+\end{verbatim}
+}
+
+\noindent
+(The listing is wrapped to the page width; the disclaimer and label
+explanation that follow in the actual output are quoted in
+Section~3.11.4.)
+
+\section{General Discussion}
+
+Read together, the results support four statements.
+
+First, \emph{the acoustic signal is real but modest}. Under honest
+validation, continuous speech supports a subject-level balanced
+accuracy of about 0.82 on this corpus, and a ranking ability (AUC
+0.70) that survives transfer to another language and recording
+channel. The features driving the result --- F0 range, spectral
+variability, perturbation --- correspond to the established clinical
+description of hypokinetic dysarthria, which strengthens the
+interpretation that the models measure the intended phenomenon.
+
+Second, \emph{validation design dominates headline numbers}. The same
+pipeline spans 0.775 to 0.909 depending only on the split
+(Section~4.8). This range exceeds the total improvement achieved by
+all feature engineering and model selection in this project combined
+($+0.042$), which is the clearest argument that in this field the
+validation scheme deserves more scrutiny than the model.
+
+Third, \emph{improvements must be disciplined to be real}. Under
+pre-declared rules, most attempted improvements --- tuning, ensembling,
+richer summaries --- failed to clear a modest 0.02 margin. What
+remained (continuous-speech features and chunk averaging) is
+physiologically motivated and consistent across seeds. The 0.840
+ensemble figure is reported, but adopting it on a 0.018 margin would
+have been selection noise.
+
+Fourth, \emph{uncertainty handling is a result, not a footnote}. The
+inconclusive band, placed where the classes' score distributions
+overlap, absorbed 100\% of the elderly healthy speakers in the
+external test that the raw classifier would otherwise have
+misclassified at a rate near chance. For a screening-support concept,
+declining to answer out-of-domain is the correct behaviour, and the
+young-HC anomaly (Section~4.9) shows what confident answers would have
+looked like instead.
+
+\section{Limitations and Ethical Considerations}
+\label{sec:limitations}
+
+The findings above must be read within the following limitations,
+which also fix the ethical boundaries of the system's use.
+
+\subsection{Limitations of the Data}
+
+\begin{enumerate}
+  \item \textbf{Small sample.} 37 subjects; each validation fold tests
+        7--8 people, so single individuals move fold scores by several
+        points. All results are therefore reported with their spread,
+        and none should be quoted as a single number.
+  \item \textbf{One recording setup per corpus.} All training
+        recordings share one device and environment; the model cannot
+        distinguish ``unhealthy voice'' from ``unfamiliar recording'',
+        as the external validation demonstrates.
+  \item \textbf{One language in training.} English only; the measured
+        cross-language drop quantifies, but does not remove, this
+        limitation.
+  \item \textbf{No demographic metadata.} Without verified per-subject
+        sex and age, demographic confounding cannot be excluded ---
+        only bounded, as in the ablation of Section~4.4, which changed
+        the selected model's result by less than 0.02.
+  \item \textbf{Class imbalance.} 42 HC versus 31 PD recordings,
+        mitigated by balanced weighting and balanced accuracy but not
+        removed.
+  \item \textbf{No severity information.} Early and advanced PD are one
+        class; the system's sensitivity specifically to \emph{early}
+        disease --- the motivating use case --- is therefore
+        unmeasured.
+\end{enumerate}
+
+\subsection{Limitations of the Method}
+
+\begin{enumerate}
+  \item Jitter, shimmer, and HNR are defined for sustained phonation
+        and are noisier proxies on continuous speech; CPPS and the
+        pause statistics partly, not fully, compensate.
+  \item Chunk-mean aggregation deliberately discards temporal detail in
+        exchange for stability and explainability.
+  \item The classifier's score is not a calibrated probability; a score
+        of 0.7 does not mean a 70\% chance of disease, and the
+        prototype's wording enforces this reading.
+  \item The system is cross-sectional: it compares a recording against
+        dataset groups, never a person against their own history,
+        although longitudinal change would likely be the more
+        sensitive signal.
+\end{enumerate}
+
+\subsection{Limitations of the Evidence}
+
+\begin{enumerate}
+  \item One external corpus was tested; 0.701 AUC is a single data
+        point about generalization, not a characterization of it.
+  \item Cross-validation characterizes performance over this
+        population, not the reliability of any statement about an
+        individual.
+  \item The 0.02 adoption margin, although pre-declared and
+        consistently applied, is a judgement; a different reasonable
+        margin would have selected the ensemble.
+\end{enumerate}
+
+\subsection{Ethical Constraints and Mandatory Wording}
+
+The system is a research screening-support prototype and is presented
+as such in every interface and in this report. Two concrete harms
+shape its wording. A \emph{false reassurance} (a missed PD case ---
+about one in four internally) could delay a genuine clinical visit;
+a \emph{false alarm} (about one in eight internally, and roughly four
+in ten in the external setting) could cause real distress. The
+inconclusive band exists to reduce both in the uncertain region, and
+the mandatory framing addresses the rest: the output is always
+described as a non-diagnostic indication of similarity between
+acoustic patterns; the score is always labelled a property of the
+research model, not a person's medical risk; the HC/PD labels are
+explained as dataset-group similarity, explicitly not as the presence
+or absence of any condition; and every result carries the statement
+that it must not replace evaluation by a qualified healthcare
+professional. Formulations such as ``diagnoses Parkinson's disease'',
+``detects Parkinson's with certainty'', ``medical decision system'',
+or ``clinically validated'' are prohibited and do not appear in the
+software or in this report. Finally, recordings submitted to the
+prototype are processed in a temporary file deleted immediately after
+analysis, no audio or result is stored or transmitted, and the audio
+corpora are used under their licences without redistribution.
