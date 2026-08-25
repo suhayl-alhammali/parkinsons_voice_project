@@ -1,3 +1,72 @@
-%============ AppendixB.tex ===================
-\chapter{Full Experimental Results}
-	extit{[To be written.]}
+%============ AppendixB.tex — Full Experimental Results ===================
+\chapter{Additional Experimental Results}
+\label{app:results}
+
+This appendix supplements the result tables of Chapter~4 with the
+fold-level detail and confusion matrices of the baseline phase
+(single seed 42, stratified grouped 5-fold, as in
+Table~4.1). All values are taken from the generated report
+\texttt{reports/metrics\_report.md} of the project repository.
+
+\section{Per-Fold Balanced Accuracy (Baseline Phase)}
+
+\begin{table}[htb]
+\centering
+\caption{Recording-level balanced accuracy of each fold.}
+\label{tab:perfold}
+\begin{tabular}{lccccc}
+\toprule
+Model & Fold 1 & Fold 2 & Fold 3 & Fold 4 & Fold 5 \\
+\midrule
+Majority baseline   & 0.500 & 0.500 & 0.500 & 0.500 & 0.500 \\
+Logistic regression & 0.533 & 0.812 & 0.312 & 0.833 & 0.708 \\
+SVM (RBF)           & 0.733 & 0.750 & 0.625 & 1.000 & 0.708 \\
+Random Forest       & 0.783 & 0.750 & 0.521 & 0.833 & 0.771 \\
+MLP                 & 0.617 & 0.679 & 0.646 & 0.750 & 0.625 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The fold-to-fold spread is large --- for example, 0.312 to 0.833 for
+logistic regression, and a single perfect fold (1.000) for the SVM ---
+which is the expected behaviour when each test fold contains only
+7--8 subjects. This spread is the empirical basis for the $\pm0.02$
+adoption margin of the model-selection protocol (Section~3.9) and for
+reporting every headline number together with its variability.
+
+\section{Pooled Confusion Matrices (Baseline Phase)}
+
+Table~\ref{tab:confusions} shows the pooled out-of-fold confusion
+counts at both evaluation levels, in the form
+TN / FP / FN / TP (true HC classified HC / true HC classified PD /
+true PD classified HC / true PD classified PD). Recording level
+totals 42 HC and 31 PD recordings; subject level totals 21 HC and 16
+PD subjects.
+
+\begin{table}[htb]
+\centering
+\caption{Pooled confusion counts, baseline phase (TN/FP/FN/TP).}
+\label{tab:confusions}
+\begin{tabular}{lcc}
+\toprule
+Model & Recording level & Subject level \\
+\midrule
+Majority baseline   & 42/0/31/0  & 21/0/16/0 \\
+Logistic regression & 33/9/15/16 & 16/5/7/9 \\
+SVM (RBF)           & 32/10/7/24 & 17/4/4/12 \\
+Random Forest       & 35/7/11/20 & 16/5/5/11 \\
+MLP                 & 32/10/13/18 & 17/4/7/9 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Final Model: Recording-Level Confusion by Seed}
+
+For the adopted configuration (V1, Random Forest), the pooled
+recording-level confusion for seed 42 is 36/6/7/24 (TN/FP/FN/TP), as
+reported in Section~4.6; the corresponding out-of-fold prediction
+tables for all three seeds, including every recording's score, subject
+identifier, task, and fold assignment, are stored in the repository
+(\texttt{data/processed/final\_oof\_predictions.csv} for seed 42, and
+regenerable for the others via
+\texttt{scripts/train\_final\_model.py}).

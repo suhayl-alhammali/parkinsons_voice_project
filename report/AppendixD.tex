@@ -1,3 +1,77 @@
-%============ AppendixD.tex ===================
+%============ AppendixD.tex — Key Code Excerpts ===================
 \chapter{Key Code Excerpts}
-	extit{[To be written.]}
+\label{app:code}
+
+The following excerpts are reproduced verbatim from the repository and
+implement the decisions most central to the report's claims. (The
+subject-overlap assertion, equally central, is already listed verbatim
+in Section~3.8.)
+
+\section{Chunk-Mean Aggregation at Prediction Time}
+
+From \texttt{src/pvoice/predict.py}: a new recording is segmented and
+aggregated by exactly the training-time rule (Eq.~3.1), using the same
+extraction functions.
+
+{\small
+\begin{verbatim}
+    # Same rule as training: split into chunks, extract features per chunk,
+    # average each feature over chunks (config.AGGREGATION).
+    chunks = segment_audio(audio)
+    chunk_rows = [extract_features(chunk) for chunk in chunks]
+    mean_features = pd.DataFrame(chunk_rows).mean(axis=0).to_dict()
+    X = pd.DataFrame([mean_features], columns=feature_names())
+\end{verbatim}
+}
+
+\section{The Final Model Pipeline}
+
+From \texttt{scripts/train\_final\_model.py}: the adopted classifier
+as a three-stage pipeline, whose imputation and scaling statistics are
+fitted only on the data passed to \texttt{fit} --- i.e., on training
+folds during validation (Section~3.7).
+
+{\small
+\begin{verbatim}
+def build_pipeline() -> Pipeline:
+    return Pipeline([
+        ("imputer", SimpleImputer(strategy="median")),
+        ("scaler", StandardScaler()),
+        ("clf", RandomForestClassifier(
+            n_estimators=300, class_weight="balanced",
+            random_state=config.RANDOM_STATE)),
+    ])
+\end{verbatim}
+}
+
+\section{Score Interpretation (Inconclusive Band)}
+
+From \texttt{src/pvoice/predict.py}: the mapping of the classifier
+score to the three-way outcome of Figure~3.3, with the band limits
+taken from the central configuration
+(\texttt{UNCERTAIN\_LOW} $= 0.35$, \texttt{UNCERTAIN\_HIGH} $= 0.65$).
+
+{\small
+\begin{verbatim}
+def classify_score(pd_score: float | None, fallback_label: str) -> tuple[str, str]:
+    """Map a model score to (display label, headline sentence).
+
+    Scores inside the configured uncertain band become "UNCERTAIN" rather
+    than a hard class call; scores outside it keep the class the model
+    predicted.  When no score is available, the raw class prediction is
+    used as-is.
+    """
+    if pd_score is None:
+        label = fallback_label
+    elif config.UNCERTAIN_LOW <= pd_score <= config.UNCERTAIN_HIGH:
+        return ("UNCERTAIN",
+                "The research model could not clearly assign this "
+                "recording to either class (the score is in the "
+                "inconclusive middle range).")
+    else:
+        label = "PD" if pd_score > config.UNCERTAIN_HIGH else "HC"
+    return (label,
+            "The acoustic pattern was classified by the research model as "
+            f"closer to the {label} class.")
+\end{verbatim}
+}

@@ -70,7 +70,11 @@ addressed quantitatively in Section~4.4.
 
 Table~\ref{tab:phase4} reports the baseline phase: the 43-feature
 whole-recording representation (variant V0) evaluated for all five
-models under the full protocol. Every learned model clearly exceeds the
+models. This phase used a single-seed instance of the protocol
+(seed 42, stratified grouped 5-fold splitting, metrics pooled over the
+out-of-fold predictions); the three-seed repetition was introduced with
+the model-selection study of Section~4.5. Every learned model clearly
+exceeds the
 majority-class baseline, whose balanced accuracy of exactly 0.5 ---
 despite 0.575 plain accuracy --- illustrates why balanced accuracy is
 the primary metric. The SVM performed best (subject-level balanced
@@ -81,9 +85,10 @@ balanced accuracy).
 \begin{table}[htb]
 \centering
 \caption{Baseline results (variant V0: 43 features per whole
-recording), subject-independent validation. Balanced accuracy (bal.\
-acc.) is shown at recording and subject level (3-seed mean);
-sensitivity, specificity, and AUC at recording level.}
+recording), subject-independent validation with a single seed (42),
+5-fold, pooled over out-of-fold predictions. Balanced accuracy (bal.\
+acc.) at recording and subject level; sensitivity, specificity, and
+AUC at recording level.}
 \label{tab:phase4}
 \small
 \begin{tabular}{lccccc}
@@ -92,9 +97,9 @@ Model & \makecell[c]{Bal.\ acc.\\(recording)} &
 \makecell[c]{Bal.\ acc.\\(subject)} & Sensitivity & Specificity & AUC \\
 \midrule
 Majority baseline   & 0.500 & 0.500 & 0.000 & 1.000 & 0.500 \\
-Logistic regression & 0.651 & 0.704 & 0.516 & 0.786 & 0.717 \\
-SVM (RBF)           & 0.761 & 0.780 & 0.774 & 0.762 & 0.741 \\
-Random Forest       & 0.725 & 0.725 & 0.645 & 0.833 & 0.775 \\
+Logistic regression & 0.651 & 0.662 & 0.516 & 0.786 & 0.717 \\
+SVM (RBF)           & 0.768 & 0.780 & 0.774 & 0.762 & 0.741 \\
+Random Forest       & 0.739 & 0.725 & 0.645 & 0.833 & 0.775 \\
 MLP                 & 0.671 & 0.686 & 0.581 & 0.762 & 0.736 \\
 \bottomrule
 \end{tabular}
@@ -117,7 +122,8 @@ excluded from all subsequent modelling.
 \begin{table}[htb]
 \centering
 \caption{Ablation of the four absolute-F0 features
-(recording-level balanced accuracy, 3-seed mean).}
+(recording-level balanced accuracy, single seed 42, pooled
+out-of-fold; same protocol as Table~\ref{tab:phase4}).}
 \label{tab:ablation}
 \begin{tabular}{lcc}
 \toprule
@@ -136,7 +142,12 @@ MLP                 & 0.671 & 0.526 \\
 Table~\ref{tab:experiments} reports all 19 configurations evaluated
 under the pre-declared protocol of Section~3.9 --- every variant of
 Table~3.3 crossed with the remaining models, plus the tuned and
-ensemble variants. None reached the 0.95 investigation threshold.
+ensemble variants. None reached the 0.95 investigation threshold. The
+V0 rows re-evaluate the baseline representation under the full
+three-seed protocol; their small differences from the single-seed
+values of Table~\ref{tab:phase4} (for example, 0.704 versus 0.662 for
+logistic regression at subject level) reflect the averaging over
+additional seeds, not any change to the pipeline.
 
 \begin{table}[htb]
 \centering

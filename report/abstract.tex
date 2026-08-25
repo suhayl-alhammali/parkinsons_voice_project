@@ -1,27 +1,36 @@
 %============ abstract.tex ===================
-% DRAFT PLACEHOLDER — the final abstract will be written and submitted
-% for approval after all chapters are approved, so that it summarizes
-% the approved text exactly.
 \chapter*{Abstract}
 \addcontentsline{toc}{chapter}{Abstract}
 
-\textit{[Draft placeholder — the abstract will be finalized after all
-chapters are approved.]}
+Parkinson's Disease impairs the neuromuscular control of speech,
+producing measurable changes in the voice that can appear early in the
+disease. This project develops and evaluates a complete, reproducible
+research prototype that analyses raw continuous-speech recordings for
+Parkinson's-related acoustic patterns using classical, explainable
+machine learning, with particular emphasis on honest validation.
 
-Parkinson's disease alters the muscles used in speech production,
-producing measurable changes in the voice. This project develops a
-complete, reproducible research prototype that analyses raw voice
-recordings for Parkinson's-related acoustic patterns using classical,
-explainable machine learning. Seventy-four acoustic features covering
-pitch statistics, jitter, shimmer, harmonics-to-noise ratio, cepstral
-peak prominence, pause behaviour, and spectral shape are extracted from
-10-second segments of each recording and averaged. A Random Forest
-classifier, validated with strictly subject-independent cross-validation
-on the MDVR-KCL dataset (37 subjects), achieves a subject-level balanced
-accuracy of 0.822 $\pm$ 0.032. External validation on an independent
-Italian dataset with no adaptation yields a speaker-level area under the
-receiver operating characteristic curve of 0.701, quantifying
-generalization across language and recording conditions. A screening
-prototype with deliberately cautious, non-diagnostic reporting completes
-the system.
+From each recording, after standardized preprocessing and segmentation
+into 10-second chunks, 74 physiologically motivated acoustic features
+are extracted --- fundamental-frequency statistics, jitter, shimmer,
+harmonics-to-noise ratio, smoothed cepstral peak prominence, pause
+statistics, and mel-frequency cepstral coefficients with their
+dynamics --- and averaged per recording. Classifiers were compared on
+the MDVR-KCL corpus (37 subjects) under strictly subject-independent
+cross-validation, with model selection governed by rules declared
+before experimentation. The adopted Random Forest achieved a
+subject-level balanced accuracy of $0.822 \pm 0.032$, sensitivity of
+0.771, specificity of 0.873, and an area under the receiver operating
+characteristic curve of 0.864, with pitch range and spectral
+variability as its leading features. A controlled comparison showed
+that a deliberately leaky chunk-level split inflates the same
+pipeline's result from 0.775 to 0.909, quantifying why
+subject-independent validation is essential. External validation on an
+independent Italian corpus (61 speakers), with the model frozen and
+recording bandwidth harmonized to neutralize a discovered sample-rate
+confound, yielded a speaker-level area under the curve of 0.701 and
+balanced accuracy of 0.629 across language and recording conditions.
+The accompanying screening prototype reports scores between 0.35 and
+0.65 as inconclusive, attaches recording-condition warnings, and
+frames every output as a non-diagnostic research indication requiring
+professional clinical evaluation.
 \thispagestyle{plain}

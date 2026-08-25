@@ -1,3 +1,69 @@
-%============ AppendixA.tex ===================
+%============ AppendixA.tex — Complete Feature Inventory ===================
 \chapter{Complete Feature Inventory}
-	extit{[To be written.]}
+\label{app:features}
+
+Table~\ref{tab:inventory} lists all 74 features in the exact order
+produced by the extraction stage (\texttt{src/pvoice/features.py});
+this order is part of the saved pipeline contract
+(Section~3.2). The MFCC and delta-MFCC families are listed as ranges:
+each comprises the mean and standard deviation of coefficients 0--12.
+
+\begin{longtable}{p{4.4cm} p{9.6cm}}
+\caption{The complete 74-feature inventory.}
+\label{tab:inventory}\\
+\toprule
+Feature name & Meaning \\
+\midrule
+\endfirsthead
+\toprule
+Feature name & Meaning \\
+\midrule
+\endhead
+\multicolumn{2}{l}{\emph{Fundamental frequency statistics (7)}}\\
+\texttt{f0\_mean\_hz}    & mean of the F0 track over voiced frames (Hz) \\
+\texttt{f0\_median\_hz}  & median F0 (Hz) \\
+\texttt{f0\_std\_hz}     & standard deviation of F0 (Hz); pitch variability \\
+\texttt{f0\_min\_hz}     & minimum tracked F0 (Hz) \\
+\texttt{f0\_max\_hz}     & maximum tracked F0 (Hz) \\
+\texttt{f0\_range\_hz}   & F0 maximum minus minimum (Hz) \\
+\texttt{voiced\_fraction} & fraction of frames with detected voicing \\
+\midrule
+\multicolumn{2}{l}{\emph{Jitter variants (4)}}\\
+\texttt{jitter\_local}     & mean absolute period-to-period difference, relative (Eq.~2.1) \\
+\texttt{jitter\_local\_abs} & the same difference in seconds \\
+\texttt{jitter\_rap}       & relative average perturbation (3-period) \\
+\texttt{jitter\_ppq5}      & 5-period perturbation quotient \\
+\midrule
+\multicolumn{2}{l}{\emph{Shimmer variants (5)}}\\
+\texttt{shimmer\_local}    & mean absolute amplitude difference, relative (Eq.~2.2) \\
+\texttt{shimmer\_local\_db} & the same difference in decibels \\
+\texttt{shimmer\_apq3}     & 3-period amplitude perturbation quotient \\
+\texttt{shimmer\_apq5}     & 5-period amplitude perturbation quotient \\
+\texttt{shimmer\_apq11}    & 11-period amplitude perturbation quotient \\
+\midrule
+\multicolumn{2}{l}{\emph{Noise (1)}}\\
+\texttt{hnr\_mean\_db}     & mean harmonics-to-noise ratio (dB, Eq.~2.3) \\
+\midrule
+\multicolumn{2}{l}{\emph{MFCC summary statistics (26)}}\\
+\texttt{mfcc\{0--12\}\_mean} & mean of each of the 13 MFCCs over frames \\
+\texttt{mfcc\{0--12\}\_std}  & standard deviation of each MFCC over frames \\
+\midrule
+\multicolumn{2}{l}{\emph{Cepstral (1)}}\\
+\texttt{cpps\_db}          & smoothed cepstral peak prominence (dB) \\
+\midrule
+\multicolumn{2}{l}{\emph{Pause and timing statistics (4)}}\\
+\texttt{pause\_count\_per\_min} & pauses ($\geq$0.2 s) per minute \\
+\texttt{pause\_mean\_s}    & mean pause duration (s) \\
+\texttt{pause\_ratio}      & fraction of total time spent in pauses \\
+\texttt{speech\_seg\_mean\_s} & mean duration of continuous speech stretches (s) \\
+\midrule
+\multicolumn{2}{l}{\emph{Delta-MFCC summary statistics (26)}}\\
+\texttt{mfccD\{0--12\}\_mean} & mean of each MFCC time-derivative over frames \\
+\texttt{mfccD\{0--12\}\_std}  & standard deviation of each MFCC time-derivative \\
+\bottomrule
+\end{longtable}
+
+In the stored feature order, the base set of the baseline phase
+(43 features) comprises the F0, jitter, shimmer, and noise families
+followed by the MFCC summary statistics; the extended set appends the
+cepstral, pause, and delta-MFCC families.
