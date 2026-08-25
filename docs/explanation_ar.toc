@@ -1,4 +1,0 @@
-\xpg@aux {}{arabic}
-\contentsline {chapter}{الجزء 0 --- خريطة الطريق}{\pLRE {٣}}{chapter*.2}%
-\contentsline {chapter}{الجزء 1 --- المشكلة الطبية وكيف يُنتَج الصوت}{\pLRE {٦}}{chapter*.9}%
-\contentsline {chapter}{الجزء 2 --- الصوت كإشارة رقمية}{\pLRE {١٠}}{chapter*.16}%

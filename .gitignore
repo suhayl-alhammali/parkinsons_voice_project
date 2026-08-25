@@ -37,3 +37,7 @@ report/build.log
 report/bib.log
 report/c2*.log
 texput.log
+docs/*.aux
+docs/*.log
+docs/*.out
+docs/*.toc
