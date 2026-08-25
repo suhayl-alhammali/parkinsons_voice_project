@@ -346,11 +346,14 @@ phonates a steady ``ah''; this isolates phonatory function and suits
 the classical perturbation measures. Little et al.\ combined dysphonia
 measures of sustained vowels with an SVM classifier to separate PD
 speakers from controls \cite{little2009}, and Tsanas et al.\ extended
-this line with large feature sets and feature selection, reporting
-almost 99\% classification accuracy on sustained-vowel data ---
-while explicitly noting that their cross-validation did not enforce
-subject separation and that speaker-specific cues may therefore
-contribute \cite{tsanas2012}. The second paradigm uses \emph{connected
+this line with a set of 132 dysphonia measures and feature selection,
+reporting almost 99\% classification accuracy on sustained-vowel data
+\cite{tsanas2012}. Results of this magnitude, here as elsewhere in the
+field, must be read together with the validation-design question
+discussed in Section~2.6: when several samples of the same speaker can
+fall on both sides of a random split, part of the measured performance
+may reflect speaker recognition rather than disease detection
+\cite{saeb2017}. The second paradigm uses \emph{connected
 speech} (read text or spontaneous conversation), which engages
 articulation and prosody in addition to phonation and is closer to
 natural speaking conditions \cite{rusz2011,skodda2008}; it is the
@@ -362,10 +365,13 @@ read text and spontaneous dialogue from 37 English-speaking
 participants (21 healthy controls and 16 PD patients) and serves as the
 training corpus; its detailed inspection appears in Chapter~4. The
 Italian Parkinson's Voice and Speech database, collected by Dimauro et
-al.\ in the context of speech-intelligibility assessment
-\cite{dimauro2017}, contains recordings of 65 Italian speakers
-(young healthy, elderly healthy, and PD groups) and serves here
-exclusively as an external, never-trained-on test set.
+al.\ in the context of speech-intelligibility assessment, contains
+recordings of 65 Italian speakers in young healthy, elderly healthy,
+and PD groups \cite{dimauro2017}. The publicly mirrored copy of this
+database used in the present work comprises 61 of those speakers
+(15 young healthy controls, 22 elderly healthy controls, and 24 PD
+patients; Chapter~4), and serves here exclusively as an external,
+never-trained-on test set.
 
 Published classification studies on MDVR-KCL and similar corpora
 frequently report accuracies above 95\%. In light of the record-wise

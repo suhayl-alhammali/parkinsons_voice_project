@@ -1,0 +1,14 @@
+This is XeTeX, Version 3.141592653-2.6-0.999997 (MiKTeX 25.12) (preloaded format=xelatex.fmt)
+ restricted \write18 enabled.
+entering extended mode
+! I can't find file `main.tex'.
+<*> main.tex
+            
+(Press Enter to retry, or Control-C to exit)
+Please type another input file name
+! Emergency stop.
+<*> main.tex
+            
+No pages of output.
+Transcript written on texput.log.
+xelatex: major issue: So far, no MiKTeX administrator has checked for updates.
