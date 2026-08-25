@@ -36,3 +36,4 @@ report/pass*.log
 report/build.log
 report/bib.log
 report/c2*.log
+texput.log
