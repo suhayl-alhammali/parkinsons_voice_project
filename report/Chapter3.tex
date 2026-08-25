@@ -397,11 +397,13 @@ than the model, adapts to the data --- the following rules were fixed
   \item The primary metric is subject-level balanced accuracy, averaged
         over seeds.
   \item A more complex variant is adopted only if it exceeds the
-        simpler alternative by more than 0.02 on the primary metric;
-        otherwise the simpler variant is retained. The margin reflects
-        the seed-to-seed variability observed at this sample size
-        (about $\pm0.03$), below which differences are
-        indistinguishable from noise.
+        simpler alternative by more than $+0.02$ on the primary
+        metric; otherwise the simpler variant is retained. The margin
+        is one-sided --- it applies to improvements --- and its size
+        reflects the variability observed at this sample size: a large
+        fold-to-fold spread (Appendix~B) and a resulting seed-to-seed
+        variability of the mean of about $\pm 0.03$, below which
+        differences are indistinguishable from noise.
   \item Any result at or above 0.95 halts the study for a leakage
         investigation (Section~3.8.2).
   \item Every evaluated configuration is reported, including rejected

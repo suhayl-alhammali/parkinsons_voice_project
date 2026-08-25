@@ -51,6 +51,11 @@
 \usepackage{microtype}
 \hyphenpenalty=5000
 \tolerance=1000
+% Final-polish settings: forbid widow and orphan lines, and allow a
+% little extra inter-word stretch before lines overflow the margin.
+\widowpenalty=10000
+\clubpenalty=10000
+\emergencystretch=1.5em
 \usepackage[hidelinks]{hyperref}
 \bibliographystyle{IEEEtran}
 \renewcommand{\bibname}{References}
