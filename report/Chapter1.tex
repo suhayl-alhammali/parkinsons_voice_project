@@ -1,0 +1,220 @@
+%============ Chapter1.tex — Introduction ===================
+\chapter{Introduction}
+
+\section{Overview}
+
+This report documents the design, implementation, and evaluation of a
+research prototype that analyses raw voice recordings for acoustic
+patterns associated with Parkinson's Disease (PD) using classical,
+explainable Machine Learning (ML). The system covers the complete chain
+from an audio file to a cautious screening indication: signal
+preprocessing, acoustic feature extraction, model training,
+subject-independent validation, external validation on an independent
+dataset, and a file-based screening application. This chapter introduces
+the medical and engineering motivation behind the project, states the
+problem formally, lists the project objectives, defines the scope and
+the non-diagnostic framing of the system, and outlines the organization
+of the remainder of the report.
+
+\section{Background and Motivation}
+
+Parkinson's Disease is the second most common neurodegenerative
+disorder after Alzheimer's disease. It is caused by the progressive loss
+of dopamine-producing neurons in regions of the brain that control
+movement, and it manifests as tremor, muscular rigidity, slowness of
+movement, and reduced movement amplitude. The disease burden is large
+and growing: the Global Burden of Disease study estimated that about 6.1
+million people were living with PD in 2016, more than double the number
+in 1990, a rise driven mainly by population ageing \cite{gbd2018}.
+
+Despite this burden, no simple objective test for PD is available in
+routine practice. The diagnosis remains clinical: it is established from
+motor signs observed by a neurologist, following criteria such as those
+of the Movement Disorder Society (MDS) \cite{postuma2015}. Post-mortem
+morphometric evidence indicates that a substantial proportion of the
+dopaminergic neurons of the substantia nigra is typically already lost
+by the time the characteristic motor signs appear \cite{fearnley1991},
+which narrows the window in which future disease-modifying treatments
+could be most useful. These facts together motivate the search for
+inexpensive, non-invasive measurements that could support earlier
+referral of at-risk individuals to clinical evaluation
+\cite{postuma2015,fearnley1991}.
+
+The human voice is a promising carrier of such measurements. Speaking is
+a motor activity that depends on the coordinated action of the
+respiratory muscles, the vocal folds of the larynx, and the
+articulators of the vocal tract; the same neuromuscular impairments that
+affect limb movement in PD also affect these structures. Speech and
+voice impairment --- reduced loudness, monotone pitch, breathiness, and
+imprecise articulation, collectively described as hypokinetic
+dysarthria --- has been reported in approximately 90\% of a large
+clinical sample of PD patients \cite{ho1999}. Importantly for
+screening, acoustic abnormalities appear early: quantitative acoustic
+analysis detected some form of vocal impairment in about 78\% of
+patients with early, untreated PD \cite{rusz2011}, and a longitudinal
+case study found measurable reduction of fundamental-frequency
+variability in recordings made about five years before the clinical
+diagnosis \cite{harel2004}.
+
+A voice recording can be captured in seconds with a commodity
+microphone or smartphone, at negligible cost, with no discomfort, and
+repeatedly. If acoustic measurements of such recordings can be related
+to PD status with useful reliability, voice analysis could serve as a
+low-cost screening-support signal, flagging individuals for whom a
+clinical examination is advisable. This prospect has produced a large
+research literature and several public datasets, including the Mobile
+Device Voice Recordings at King's College London (MDVR-KCL) corpus used
+in this project \cite{jaeger2019}.
+
+Two considerations shaped the engineering approach taken here. First,
+in a biomedical setting, the ability to explain \emph{why} a model
+produced its output is valued alongside raw performance; classical ML
+models operating on physiologically interpretable acoustic features
+were therefore preferred over deep learning, whose learned
+representations are difficult to interpret and whose data requirements
+far exceed the 37 subjects available. Second, published results in this
+field frequently report accuracies above 95\%, which, as examined in
+Chapters 2 and 4, often stems from evaluation protocols that let the
+same speaker appear in both training and test data. Producing an
+honest, subject-independent, and externally tested estimate of
+performance was therefore treated not as an obstacle but as a central
+contribution of the project.
+
+\section{Problem Statement}
+
+The problem addressed by this project is stated as follows: given a raw
+voice recording of continuous speech, determine --- by means of
+reproducible signal processing and classical machine learning ---
+whether the acoustic pattern of the recording is closer to that of a
+group of speakers with PD or to that of a group of healthy control
+speakers, and report the result with an honest, subject-independent
+estimate of reliability and with wording appropriate to a
+non-diagnostic research tool.
+
+Solving this problem requires answering several subsidiary questions:
+which acoustic measurements meaningfully capture Parkinson's-related
+voice changes in continuous speech; how such measurements must be
+extracted so that training, evaluation, and prediction remain strictly
+consistent; how a model must be validated when several recordings
+originate from the same person; how much of the measured performance
+survives transfer to a different dataset, language, and recording
+channel; and how the output of such a system must be presented to avoid
+overstating what it knows.
+
+\section{Project Objectives}
+
+The objectives were divided into a primary set, which defines the
+minimum complete system, and an extended set, which was undertaken after
+the primary objectives were met.
+
+\subsection{Primary Objectives}
+
+\begin{enumerate}
+  \item Inspect and verify the MDVR-KCL dataset before any modelling:
+        file integrity, class labels, subject identities, and the
+        feasibility of subject-independent validation.
+  \item Implement a consistent preprocessing pipeline for raw audio
+        (mono conversion, fixed sample rate, offset removal, silence
+        trimming, and amplitude normalization) that deliberately avoids
+        operations that would distort clinically meaningful signal
+        irregularities.
+  \item Implement, as a core contribution, the extraction of
+        physiologically motivated acoustic features: fundamental
+        frequency statistics, jitter, shimmer, harmonics-to-noise
+        ratio, and mel-frequency cepstral coefficient statistics.
+  \item Train and compare classical ML classifiers (logistic
+        regression, support vector machine, random forest, and
+        multilayer perceptron) against a majority-class baseline.
+  \item Evaluate all models with strictly subject-independent
+        cross-validation, reporting balanced accuracy, sensitivity,
+        specificity, F1 score, confusion matrices, and the area under
+        the receiver operating characteristic curve, together with
+        their variability across folds and random seeds.
+  \item Build a file-based screening prototype (browser application and
+        command-line interface) that reuses the identical pipeline and
+        presents results with mandatory non-diagnostic wording.
+\end{enumerate}
+
+\subsection{Extended Objectives}
+
+\begin{enumerate}
+  \setcounter{enumi}{6}
+  \item Improve classification performance through recording
+        segmentation and additional continuous-speech features
+        (smoothed cepstral peak prominence, pause statistics, and
+        delta mel-frequency cepstral coefficients) under
+        model-selection rules declared before experimentation, so that
+        the improvement process itself cannot overfit the validation
+        data.
+  \item Demonstrate quantitatively, on the project's own data, how an
+        incorrect validation design inflates reported performance.
+  \item Validate the final, frozen model externally on an independent
+        dataset recorded in a different language and under different
+        conditions, and report the resulting generalization gap.
+  \item Extend the prototype with uncertainty-aware reporting: an
+        inconclusive score band, recording-condition warnings, and a
+        microphone demonstration mode explicitly framed as
+        out-of-domain.
+\end{enumerate}
+
+All ten objectives were achieved; the evidence is presented in
+Chapter~4.
+
+\section{Scope and Non-Diagnostic Framing}
+
+The system developed in this project is a research screening-support
+prototype. Throughout this report, and inside the software itself, its
+output is described as a non-diagnostic indication of similarity
+between the acoustic pattern of a recording and the patterns of the
+dataset groups. The system does not diagnose Parkinson's Disease, does
+not measure any person's medical risk, and must not replace evaluation
+by a qualified healthcare professional. Many conditions other than PD
+--- among them common respiratory infections, ageing, smoking, and
+fatigue --- also alter voice quality, and the datasets used are far too
+small and too homogeneous to support any clinical claim. The
+quantitative results presented in this report characterize performance
+over the datasets studied, not the accuracy of any statement about an
+individual. A dedicated discussion of limitations and the ethical
+constraints applied to the system's wording is given in
+Section~4.12.
+
+Within these boundaries, the scope of the work comprises: the MDVR-KCL
+dataset as the training corpus; raw audio as the only input
+representation, with all features extracted by the project's own code;
+classical machine learning as the modelling approach; an independent
+Italian corpus as an external test set; and a file-based prototype with
+an additional microphone demonstration mode. Live clinical deployment,
+longitudinal patient tracking, and deep learning approaches are outside
+the scope of this project.
+
+\section{Report Organization}
+
+The remainder of this report is organized as follows.
+
+\textbf{Chapter 2 --- Background and Literature Review} presents the
+clinical background of PD and its effect on speech production, defines
+the acoustic measurements used in voice analysis, introduces the
+classical ML models employed, examines the data-leakage problem that
+affects much of the published literature, and reviews related work on
+the datasets used here.
+
+\textbf{Chapter 3 --- Methodology} specifies the complete system: the
+dataset inspection protocol, the preprocessing chain, recording
+segmentation, the 74-feature extraction stage, the classification
+pipeline, the subject-independent validation protocol, the pre-declared
+model-selection rules, the external validation design, and the
+prototype.
+
+\textbf{Chapter 4 --- Results and Discussion} reports the outcomes of
+every stage: dataset inspection, feature validation, baseline
+modelling, the model-improvement experiments, the final model, feature
+importance, the validation-design demonstration, external validation,
+and the prototype, followed by a general discussion and a dedicated
+section on limitations and ethical considerations.
+
+\textbf{Chapter 5 --- Conclusion and Future Work} summarizes the
+findings in points and lists recommendations for future development.
+
+Four appendices provide the complete feature inventory, the full
+experimental results, a reproduction guide for the software repository,
+and key code excerpts.

@@ -1,0 +1,100 @@
+% =====================================================================
+% Voice Signal Analysis Using Machine Learning for Early Detection of
+% Parkinson's Disease -- BSc report, Department of Biomedical
+% Engineering, University of Tripoli.
+% Compile with XeLaTeX (latexmk -xelatex main.tex).
+% Template adapted from the University of Tripoli EE599 report template.
+% =====================================================================
+\documentclass[12pt,a4paper]{report}
+
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{fancyhdr}
+\usepackage{float}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{ragged2e}
+\usepackage[nottoc]{tocbibind}
+\usepackage[left=2.54cm,top=2.54cm,right=2.54cm,bottom=2.54cm]{geometry}
+\usepackage{setspace}
+\usepackage{newtxmath}          % math font (XeLaTeX-safe)
+\usepackage{verbatim}
+\usepackage{booktabs}
+\usepackage[sort,numbers]{natbib}
+\usepackage{lscape}
+\renewcommand{\baselinestretch}{1.5}
+
+% ------------- Arabic support (verse, dedication, abstract) ----------
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setmainlanguage{english}
+\setotherlanguage{arabic}
+\newfontfamily\arabicfont[Script=Arabic,Scale=1.1]{Traditional Arabic}
+
+% ------------- Figures and captions ----------------------------------
+% Department standard: "Figure (3.4): caption" below figures and
+% "Table (2.1): caption" above tables.
+\usepackage{caption}
+\DeclareCaptionLabelFormat{parens}{#1~(#2)}
+\captionsetup{labelformat=parens,labelsep=colon}
+\usepackage{subcaption}
+\graphicspath{{figures/}}
+
+% ------------- TikZ for original diagrams -----------------------------
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,fit,calc}
+
+\usepackage[hyphens]{url}
+\usepackage{microtype}
+\hyphenpenalty=5000
+\tolerance=1000
+\usepackage[hidelinks]{hyperref}
+\bibliographystyle{IEEEtran}
+\renewcommand{\bibname}{References}
+
+\begin{document}
+
+% ================= Front matter =================
+\include{coverpage}
+\pagenumbering{roman}
+\include{quran}
+\include{dedication}
+\include{declaration}
+\include{acknowledgement}
+\include{abstract}
+\include{abstract_ar}
+
+% Front-matter tables without link boxes
+\begingroup
+\hypersetup{colorlinks=false, pdfborder={0 0 0}}
+\tableofcontents
+\listoffigures
+\listoftables
+\endgroup
+
+\include{Abb}
+
+% ================= Body =================
+\cleardoublepage
+\setcounter{page}{1}
+\pagenumbering{arabic}
+
+\include{Chapter1}
+\include{Chapter2}
+\include{Chapter3}
+\include{Chapter4}
+\include{Chapter5}
+
+% ================= References =================
+\bibliography{Ref}
+
+% ================= Appendices =================
+\appendix
+\include{AppendixA}
+\include{AppendixB}
+\include{AppendixC}
+\include{AppendixD}
+
+\end{document}

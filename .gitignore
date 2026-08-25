@@ -17,3 +17,22 @@ models/*.joblib
 # OS noise
 Thumbs.db
 .DS_Store
+
+# LaTeX build artifacts (report/)
+report/*.aux
+report/*.log
+report/*.out
+report/*.toc
+report/*.lof
+report/*.lot
+report/*.bbl
+report/*.blg
+report/*.fls
+report/*.fdb_latexmk
+report/*.xdv
+report/*.png
+report/*.nlo
+report/pass*.log
+report/build.log
+report/bib.log
+report/c2*.log
