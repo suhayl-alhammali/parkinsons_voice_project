@@ -41,3 +41,7 @@ docs/*.aux
 docs/*.log
 docs/*.out
 docs/*.toc
+
+# Office lock files
+~$*
+**/~$*

@@ -16,30 +16,67 @@
 \setotherlanguage{arabic}
 \newfontfamily\arabicfont[Script=Arabic,Scale=1.1]{Traditional Arabic}
 \usepackage{microtype}
+\usepackage{xcolor}
 \usepackage[hidelinks]{hyperref}
 \linespread{1.06}
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{4pt}
 \pagestyle{plain}
 
-% Compact numbered heading for the summary.
+% ---- visual identity: matches the report figures and the defence deck
+\definecolor{honest}{HTML}{0072B2}
+\definecolor{ink}{HTML}{222222}
+\definecolor{soft}{HTML}{8A8A86}
+
+% Compact numbered heading (Arabic pages keep this original style).
 \newcommand{\shead}[1]{\par\vspace{7pt}\noindent{\large\textbf{#1}}\par\vspace{2pt}}
+
+% English pages: blue-accented heading and stage lead-ins.
+\newcommand{\sheadEN}[1]{\par\vspace{4pt}%
+\noindent{\color{honest}\rule[0.5ex]{16pt}{2.4pt}}\hspace{7pt}%
+{\large\bfseries\color{ink}#1}\par\vspace{2pt}}
+\newcommand{\stage}[1]{{\color{honest}\textbf{#1}}}
+
+% One item of the key-numbers band.
+\newcommand{\statitem}[2]{\begin{minipage}[c]{0.24\textwidth}\centering
+{\large\bfseries\color{honest}#1}\\[0pt]{\scriptsize\color{soft}#2}\end{minipage}}
 
 \begin{document}
 
 % ============================ ENGLISH, PAGES 1-2 =====================
-\enlargethispage{2\baselineskip}
+\begingroup\linespread{0.97}\selectfont\setlength{\parskip}{3pt}
+\enlargethispage{1\baselineskip}
+\noindent
+\begin{minipage}[c]{0.13\textwidth}
+\includegraphics[width=\linewidth]{figures/UOT.png}
+\end{minipage}\hfill
+\begin{minipage}[c]{0.84\textwidth}\raggedleft
+{\footnotesize\scshape\color{soft}
+University of Tripoli \,\textperiodcentered\, Faculty of Engineering\\
+Department of Biomedical Engineering \,\textperiodcentered\,
+Control and Instrumentation Division}
+\end{minipage}
+\par\vspace{3pt}
+{\color{honest}\hrule height 1.6pt}
+\vspace{6pt}
 \begin{center}
 {\large \textbf{Voice Signal Analysis Using Machine Learning for Early
-Detection of Parkinson's Disease}}\\[3pt]
-{\small Suhail Mohamed Alhammali --- ID 2200208522 ---
-Supervisor: Dr.\ Adel Adyaf\\
-Control and Instrumentation Division, Department of Biomedical
-Engineering,\\
-Faculty of Engineering, University of Tripoli --- Spring 2026}
+Detection of Parkinson's Disease}}\\[2pt]
+{\small\color{ink} Suhail Mohamed Alhammali (ID 2200208522)
+\,\textperiodcentered\, Supervisor: Dr.\ Adel Adyaf
+\,\textperiodcentered\, Spring 2026}
 \end{center}
+\vspace{2pt}
+\noindent\colorbox{honest!7}{\begin{minipage}{\dimexpr\textwidth-2\fboxsep}
+\vspace{2pt}\centering
+\statitem{37}{subjects studied}%
+\statitem{74}{acoustic measurements}%
+\statitem{0.822}{balanced accuracy}%
+\statitem{0.701}{external-corpus AUC}
+\vspace{2pt}\end{minipage}}
+\vspace{2pt}
 
-\shead{1. The problem}
+\sheadEN{1. The problem}
 Parkinson's disease damages the part of the brain that controls
 movement. Its familiar signs are tremor, stiffness, and slowness. What
 is less widely known is that the disease weakens control of
@@ -58,7 +95,7 @@ There is no simple laboratory test for Parkinson's disease. Diagnosis
 depends on a specialist examining movement, and by then much of the
 damage has already occurred.
 
-\shead{2. The idea}
+\sheadEN{2. The idea}
 If the disease changes the voice, and if those changes can be
 measured, then a voice recording might act as an early warning sign
 --- not a diagnosis, but a reason to see a doctor.
@@ -70,11 +107,11 @@ computer measure a voice recording and tell whether its pattern
 resembles the voices of people with Parkinson's disease or the voices
 of healthy people?}
 
-\shead{3. How the system works}
+\sheadEN{3. How the system works}
 The system takes an ordinary audio file and passes it through four
 stages.
 
-\textbf{First, it cleans the recording} in a standard way: one audio
+\stage{First, it cleans the recording} in a standard way: one audio
 channel, one fixed quality setting, silence removed from the beginning
 and end, and the volume levelled so that a loud recording and a quiet
 one can be compared fairly. One thing is deliberately \emph{not} done:
@@ -83,13 +120,13 @@ irregularities in a signal --- and small irregularities in the voice
 are exactly the medical evidence being looked for. Cleaning the sound
 too aggressively would erase the very thing being measured.
 
-\textbf{Second, it cuts the recording into ten-second pieces.}
+\stage{Second, it cuts the recording into ten-second pieces.}
 Measuring many short pieces and averaging them is more reliable than
 measuring a whole recording once, in the same way that taking a
 person's blood pressure several times gives a truer picture than a
 single reading.
 
-\textbf{Third, it measures the voice.} From each piece the system
+\stage{Third, it measures the voice.} From each piece the system
 computes 74 numbers. These are not arbitrary: each one is chosen
 because it corresponds to something physical in the throat and mouth.
 Some describe how high or low the voice is and how much it varies ---
@@ -104,15 +141,15 @@ Building this measurement stage was the main engineering work of the
 project. No ready-made set of measurements was downloaded; all of it
 was written and tested as part of this work.
 
-\textbf{Fourth, it learns and judges.} The 74 numbers from many
+\stage{Fourth, it learns and judges.} The 74 numbers from many
 people, with their known group, are given to a machine learning model,
 which finds the patterns that separate the two groups. The model used
 is a deliberately simple and transparent one, so that it can be asked
 afterwards \emph{which measurements it relied on} --- an answer that a
 modern ``deep learning'' system could not give.
 
-\enlargethispage{3\baselineskip}%
-\shead{4. The central question: how do you test it honestly?}
+\enlargethispage{1\baselineskip}%
+\sheadEN{4. The central question: how do you test it honestly?}
 This is where most of the project's effort went, and it is its main
 scientific contribution.
 
@@ -139,7 +176,7 @@ skill; it is memorisation. This single comparison explains why many
 published studies in this field report accuracies of 95\% or more, and
 why this project's lower number is the more trustworthy one.
 
-\shead{5. What was found}
+\sheadEN{5. What was found}
 Working with recordings from 37 people, the final system judges a
 person correctly about 82\% of the time --- measured only on people it
 had never encountered. When asked which measurement mattered most, it
@@ -168,7 +205,7 @@ answer whenever the evidence is weak. In the Italian test, this meant
 that \emph{every single} healthy elderly speaker received ``I cannot
 tell'' rather than a confident wrong label.
 
-\shead{6. What this system is not}
+\sheadEN{6. What this system is not}
 It does not diagnose Parkinson's disease, and it is not designed to.
 Many other things change a voice --- a cold, a sore throat, ageing,
 smoking, tiredness. The system reports only that a recording's
@@ -188,6 +225,7 @@ survives a move to another country and language. And a responsible
 system, faced with a voice unlike anything it was trained on, should
 say so rather than guess.
 
+\endgroup
 \clearpage
 
 % ============================ ARABIC, PAGES 3-4 ======================
