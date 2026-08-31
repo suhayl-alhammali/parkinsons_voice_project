@@ -446,14 +446,45 @@ truncated pipeline contract; rejection, with plain-language messages,
 of missing, empty, corrupted, silent, and too-short audio files; and
 exact behaviour of the inconclusive band at its boundaries (scores of
 0.349 and 0.651 classified, 0.35, 0.50, and 0.65 inconclusive).
-Second, the browser interface was exercised manually: both input
-modes render and complete analyses without server errors, and the
-microphone mode displays its out-of-domain notice. Third, an
-end-to-end command-line run on a corpus recording completed the full
-pipeline in about one minute for a 2.5-minute file --- CPPS extraction
-dominating the runtime --- and produced the following output
-(functional demonstration only; the file belongs to the training
-corpus, so the run verifies the pipeline, not accuracy):
+
+Second, the browser interface was exercised manually; both input modes
+render and complete analyses without server errors.
+Figure~\ref{fig:appui} shows the main interface, with the mandatory
+disclaimer displayed before any input is provided.
+Figure~\ref{fig:appupload} shows the file-upload mode with the
+plain-language explanation of the HC and PD labels expanded by the
+user, and Figure~\ref{fig:appmic} shows the microphone mode with
+the standing out-of-domain notice that precedes any live recording.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.82\textwidth]{app_interface.png}
+\caption{The prototype's browser interface. The non-diagnostic
+disclaimer is displayed before any input is provided.}
+\label{fig:appui}
+\end{figure}
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.82\textwidth]{app_upload.png}
+\caption{The file-upload mode, with the plain-language explanation of
+the HC and PD labels expanded by the user before a recording is
+provided.}
+\label{fig:appupload}
+\end{figure}
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.82\textwidth]{app_microphone.png}
+\caption{Microphone mode, showing the standing out-of-domain notice
+that precedes any live recording.}
+\label{fig:appmic}
+\end{figure}
+
+Third, an end-to-end command-line run on a corpus recording completed
+the full pipeline in about one minute for a 2.5-minute file --- CPPS
+extraction dominating the runtime --- and produced the following
+output:
 
 {\footnotesize
 \begin{verbatim}
@@ -477,6 +508,25 @@ person's medical risk.
 (The listing is wrapped to the page width; the disclaimer and label
 explanation that follow in the actual output are quoted in
 Section~3.11.4.)
+
+Figure~\ref{fig:appresult} shows the corresponding result view in the
+browser for a PD corpus recording. Both the command-line listing and
+the result screenshot are functional demonstrations only: the files
+analysed (\texttt{ID00\_hc\_0\_0\_0.wav} and
+\texttt{ID07\_pd\_2\_0\_0.wav}) belong to the training corpus, so the
+scores shown (0.17 and 0.96) verify that the pipeline runs end to end
+and that the mandatory wording is displayed; they are not evidence of
+classification accuracy, which is reported only under the
+subject-independent protocol of Sections~4.4 to 4.6.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.82\textwidth]{app_result.png}
+\caption{Result view for a corpus recording. The wording describes the
+model's classification and explicitly frames the score as a property
+of the research model, not a person's medical risk.}
+\label{fig:appresult}
+\end{figure}
 
 \section{General Discussion}
 

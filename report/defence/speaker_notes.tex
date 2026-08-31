@@ -1,0 +1,530 @@
+% =====================================================================
+% Speaker notes for the defence presentation — one page per slide.
+% English (short read-aloud sentences) + Arabic (for rehearsal).
+% Compile with XeLaTeX.
+% =====================================================================
+\documentclass[12pt,a4paper]{article}
+\usepackage[left=2.2cm,top=2.0cm,right=2.2cm,bottom=2.0cm]{geometry}
+\usepackage{newtxmath}
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setmainlanguage{english}
+\setotherlanguage{arabic}
+\newfontfamily\arabicfont[Script=Arabic,Scale=1.1]{Traditional Arabic}
+\usepackage{xcolor}
+\definecolor{honest}{HTML}{0072B2}
+\linespread{1.15}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\pagestyle{plain}
+
+\newcommand{\slidehead}[2]{%
+\noindent\colorbox{honest!10}{\parbox{\dimexpr\textwidth-2\fboxsep}{%
+\textbf{#1}\hfill\textbf{#2}}}\par\vspace{4pt}}
+\newcommand{\arstart}{\par\vspace{6pt}\hrule\vspace{6pt}}
+
+\begin{document}
+
+% ---------------- Slide 1 ----------------
+\slidehead{Slide 1 --- Title}{target 0:30}
+Good morning. My name is Suhail Alhammali.
+My project is about the voice and Parkinson's disease.
+I will show how a computer can measure a voice recording.
+And I will show how we tested it honestly.
+The word ``honestly'' is the heart of this talk.
+\arstart
+\begin{Arabic}
+صباح الخير. اسمي سهيل الحمالي.
+مشروعي عن الصوت ومرض باركنسون.
+سأعرض كيف يستطيع الحاسوب أن يقيس تسجيلاً صوتياً.
+وسأعرض كيف اختبرنا النظام بأمانة.
+وكلمة «بأمانة» هي قلب هذا العرض.
+\end{Arabic}
+\clearpage
+
+% ---------------- Slide 2 ----------------
+\slidehead{Slide 2 --- A movement disease reaches the voice}{target 1:00}
+Parkinson's disease destroys dopamine cells in the brain.
+These cells control movement.
+So patients get tremor, stiffness, and slow movement.
+But the disease weakens every muscle.
+That includes breathing muscles, the larynx, the tongue, and the lips.
+Follow the chain on the slide.
+Dopamine loss leads to poor motor control.
+That causes a speech disorder called hypokinetic dysarthria.
+And that produces acoustic changes we can measure.
+\arstart
+\begin{Arabic}
+يُتلف مرض باركنسون خلايا الدوبامين في الدماغ.
+وهذه الخلايا تتحكم في الحركة.
+لذلك يصاب المرضى بالرعاش والتيبّس وبطء الحركة.
+لكن المرض يُضعف كل عضلة في الجسم.
+ويشمل ذلك عضلات التنفّس والحنجرة واللسان والشفتين.
+تابعوا السلسلة على الشريحة.
+فقدان الدوبامين يؤدي إلى ضعف التحكم الحركي.
+وهذا يسبّب اضطراب كلام اسمه عُسر التلفّظ ناقص الحركة.
+وذلك يُنتج تغيّرات صوتية يمكننا قياسها.
+\end{Arabic}
+\clearpage
+
+% ---------------- Slide 3 ----------------
+\slidehead{Slide 3 --- The voice is a cheap, early window}{target 0:55}
+Why the voice? Three reasons.
+First, about ninety percent of patients show speech changes.
+Second, the changes can start early.
+In one documented case, about five years before diagnosis.
+Third, a microphone is cheap and safe.
+No needles. No scans. You can repeat it any time.
+To be clear: this is not a diagnosis.
+It is a reason to see a doctor earlier.
+\arstart
+\begin{Arabic}
+لماذا الصوت؟ لثلاثة أسباب.
+أولاً، نحو تسعين بالمئة من المرضى تظهر عندهم تغيّرات في الكلام.
+ثانياً، قد تبدأ التغيّرات مبكراً.
+في حالة موثّقة واحدة، قبل التشخيص بنحو خمس سنوات.
+ثالثاً، الميكروفون رخيص وآمن.
+لا إبر ولا أشعة. ويمكن تكراره في أي وقت.
+وللتوضيح: هذا ليس تشخيصاً.
+بل سبب لزيارة الطبيب مبكراً.
+\end{Arabic}
+\clearpage
+
+% ---------------- Slide 4 ----------------
+\slidehead{Slide 4 --- The research question}{target 0:30}
+Here is the whole project in one question.
+Can a computer measure a voice recording?
+And can it say which group the pattern resembles?
+Patients with Parkinson's, or healthy speakers?
+Everything that follows answers this question.
+\arstart
+\begin{Arabic}
+هذا هو المشروع كله في سؤال واحد.
+هل يستطيع الحاسوب أن يقيس تسجيلاً صوتياً؟
+وهل يستطيع أن يقول أي مجموعة يشبه النمط؟
+مرضى باركنسون أم الأشخاص الأصحّاء؟
+وكل ما يأتي بعد ذلك يجيب عن هذا السؤال.
+\end{Arabic}
+\clearpage
+
+% ---------------- Slide 5 ----------------
+\slidehead{Slide 5 --- Six stages, one shared implementation}{target 1:15}
+This diagram is the spine of the system.
+You will see it again on later slides.
+Raw audio comes in on the left.
+We clean it in five fixed steps.
+We cut it into ten-second chunks.
+From each chunk we take seventy-four measurements.
+A model turns them into a score.
+The output is a cautious indication, not a verdict.
+One important point: the same code runs everywhere.
+Training, testing, and prediction use one implementation.
+The program checks this before every prediction.
+\arstart
+\begin{Arabic}
+هذا المخطط هو العمود الفقري للنظام.
+وسترونه مرة أخرى في شرائح لاحقة.
+يدخل الصوت الخام من اليسار.
+ننظّفه في خمس خطوات ثابتة.
+ثم نقطّعه إلى مقاطع مدتها عشر ثوانٍ.
+ومن كل مقطع نأخذ أربعة وسبعين قياساً.
+ثم يحوّلها نموذج إلى درجة.
+والمخرج مؤشر حذر، وليس حكماً.
+ونقطة مهمة: الشيفرة نفسها تعمل في كل مكان.
+فالتدريب والاختبار والتنبّؤ تستخدم تنفيذاً واحداً.
+والبرنامج يتحقق من ذلك قبل كل تنبّؤ.
+\end{Arabic}
+\clearpage
+
+% ---------------- Slide 6 ----------------
+\slidehead{Slide 6 --- Every measurement points at physiology}{target 1:15}
+We did not choose measurements at random.
+Each one reflects something physical in the throat or mouth.
+Monotone speech shows as low pitch variation.
+Unstable vocal folds show as jitter and shimmer.
+Incomplete closure of the folds shows as breathiness.
+We measure that with HNR and CPPS.
+Disturbed timing shows in the pause statistics.
+Imprecise articulation shows in the spectral dynamics.
+We wrote all seventy-four measurements ourselves.
+Nothing was downloaded ready-made.
+\arstart
+\begin{Arabic}
+لم نختر القياسات عشوائياً.
+فكل قياس يعكس شيئاً مادياً في الحنجرة أو الفم.
+الكلام الرتيب يظهر في قلة تغيّر النبرة.
+وعدم استقرار الحبال الصوتية يظهر في الارتجاف والتذبذب.
+وعدم اكتمال إغلاق الحبال يظهر في همس الصوت.
+ونقيس ذلك بنسبة التوافقيات إلى الضجيج وبروز القمة الكبسترالية.
+واضطراب الإيقاع يظهر في إحصاءات التوقّفات.
+وضعف دقة مخارج الحروف يظهر في ديناميكيات الطيف.
+وقد كتبنا القياسات الأربعة والسبعين كلها بأنفسنا.
+لم نحمّل شيئاً جاهزاً.
+\end{Arabic}
+\clearpage
+
+% ---------------- Slide 7 ----------------
+\slidehead{Slide 7 --- We chose not to clean the sound}{target 0:55}
+Here is one engineering decision, told honestly.
+We did not remove noise from the recordings.
+That sounds wrong. It is not.
+Noise removal works by smoothing irregularities.
+But irregularity is exactly our medical evidence.
+Jitter and shimmer are irregularities.
+If we clean the sound, a sick voice looks healthy.
+So we protect the evidence and skip denoising.
+\arstart
+\begin{Arabic}
+هذا قرار هندسي واحد، نرويه بصدق.
+لم نُزل الضجيج من التسجيلات.
+يبدو ذلك خطأ. لكنه ليس كذلك.
+فإزالة الضجيج تعمل بتنعيم عدم الانتظام.
+وعدم الانتظام هو بالضبط دليلنا الطبي.
+فالارتجاف والتذبذب هما عدم انتظام.
+لو نظّفنا الصوت، لبدا الصوت المريض سليماً.
+لذلك نحمي الدليل ونتجنّب إزالة الضجيج.
+\end{Arabic}
+\clearpage
+
+% ---------------- Slide 8 ----------------
+\slidehead{Slide 8 --- A student with the exam questions}{target 1:25}
+Now the heart of the project.
+Imagine a student who gets the exam questions before the exam.
+He scores one hundred percent.
+Does that prove he understands? No.
+The same danger exists here, in a hidden form.
+Each person gave us two recordings.
+Suppose one goes to training and one goes to testing.
+The model can then simply recognise the person's voice.
+It wins without detecting any disease.
+This is called data leakage.
+Our program checks for it in every split.
+If it ever happens, the program stops itself.
+\arstart
+\begin{Arabic}
+والآن قلب المشروع.
+تخيّلوا طالباً حصل على أسئلة الامتحان قبل الامتحان.
+سيحصل على مئة بالمئة.
+هل يثبت ذلك أنه فاهم؟ لا.
+والخطر نفسه موجود هنا، بشكل خفي.
+كل شخص أعطانا تسجيلين.
+افترضوا أن أحدهما ذهب للتدريب والآخر للاختبار.
+عندها يستطيع النموذج أن يتعرّف على صوت الشخص فقط.
+فيفوز من دون أن يكشف أي مرض.
+وهذا اسمه تسريب البيانات.
+وبرنامجنا يفحص ذلك في كل تقسيم.
+وإذا حدث يوماً، يوقف البرنامج نفسه.
+\end{Arabic}
+\clearpage
+
+% ---------------- Slide 9 ----------------
+\slidehead{Slide 9 --- Validation design decides the number}{target 1:25}
+Look at this number: \textcolor{honest}{0.909}.
+It looks like an excellent result.
+[Press for the next step.]
+Now the truth.
+This number comes from a deliberately wrong split.
+Chunks of the same recording were on both sides.
+The honest split gives 0.775.
+Same data. Same model. Only the split changed.
+The difference is memorisation, not detection.
+This is why many papers report ninety-five percent or more.
+Orange means inflated. Blue means honest.
+Remember these two colours.
+\arstart
+\begin{Arabic}
+انظروا إلى هذا الرقم: \textenglish{0.909}.
+يبدو نتيجة ممتازة.
+[اضغط للخطوة التالية.]
+والآن الحقيقة.
+هذا الرقم من تقسيم خاطئ متعمَّد.
+كانت مقاطع التسجيل نفسه على الجانبين.
+أما التقسيم الأمين فيعطي \textenglish{0.775}.
+البيانات نفسها. والنموذج نفسه. تغيّر التقسيم فقط.
+والفرق هو الحفظ، لا الكشف.
+ولهذا تعلن أبحاث كثيرة خمسة وتسعين بالمئة أو أكثر.
+البرتقالي يعني مضخَّماً. والأزرق يعني أميناً.
+تذكّروا هذين اللونين.
+\end{Arabic}
+\clearpage
+
+% ---------------- Slide 10 ----------------
+\slidehead{Slide 10 --- The rules were fixed before the experiments}{target 1:00}
+We wrote our selection rules before running any experiment.
+Same splits for every variant.
+A complex variant must win by more than two points.
+Any result above ninety-five percent stops the study.
+And all nineteen configurations are reported.
+Now the punchline.
+Our best score was 0.840, from a model ensemble.
+We rejected it.
+It won by only 0.018.
+That is smaller than the random noise between runs.
+Rejecting our best number is a strength, not a loss.
+\arstart
+\begin{Arabic}
+كتبنا قواعد الاختيار قبل تشغيل أي تجربة.
+التقسيمات نفسها لكل المتغيّرات.
+والمتغيّر الأعقد يجب أن يتفوق بأكثر من نقطتين.
+وأي نتيجة فوق خمسة وتسعين بالمئة توقف الدراسة.
+وكل التكوينات التسعة عشر تُذكر في التقرير.
+والآن بيت القصيد.
+أفضل نتيجة كانت \textenglish{0.840}، من نموذج تجميعي.
+ورفضناها.
+لأنها تفوقت بمقدار \textenglish{0.018} فقط.
+وهذا أصغر من الضجيج العشوائي بين التشغيلات.
+ورفض أفضل رقم عندنا قوة، وليس خسارة.
+\end{Arabic}
+\clearpage
+
+% ---------------- Slide 11 ----------------
+\slidehead{Slide 11 --- Judged on people it has never heard}{target 1:05}
+Here are the final numbers.
+Balanced accuracy is \textcolor{honest}{0.822}, plus or minus 0.032.
+Sensitivity is 0.771. Specificity is 0.873.
+The area under the curve is 0.864.
+Every number is measured on unseen people.
+Why balanced accuracy?
+A model that always says ``healthy'' gets 0.575 accuracy.
+But it finds zero patients.
+Balanced accuracy gives that model only 0.500.
+So it cannot hide.
+\arstart
+\begin{Arabic}
+هذه هي الأرقام النهائية.
+الدقة المتوازنة \textenglish{0.822}، زائد أو ناقص \textenglish{0.032}.
+والحساسية \textenglish{0.771}. والنوعية \textenglish{0.873}.
+والمساحة تحت المنحنى \textenglish{0.864}.
+وكل رقم مقيس على أشخاص لم يرهم النموذج.
+لماذا الدقة المتوازنة؟
+نموذج يقول دائماً «سليم» يحصل على دقة \textenglish{0.575}.
+لكنه لا يجد أي مريض.
+والدقة المتوازنة تعطيه \textenglish{0.500} فقط.
+فلا يستطيع أن يختبئ.
+\end{Arabic}
+\clearpage
+
+% ---------------- Slide 12 ----------------
+\slidehead{Slide 12 --- It rediscovered a known clinical sign}{target 0:55}
+We asked the model which measurement mattered most.
+The answer: pitch range.
+Pitch range is the acoustic form of monotone speech.
+Doctors have described monotone speech for decades.
+So a system with no medical knowledge rediscovered a clinical sign.
+This is why we chose an explainable model.
+A deep network could not answer this question.
+\arstart
+\begin{Arabic}
+سألنا النموذج: أي قياس كان الأهم؟
+الجواب: مدى النبرة.
+ومدى النبرة هو الشكل الصوتي للكلام الرتيب.
+والأطباء يصفون الكلام الرتيب منذ عقود.
+أي أن نظاماً بلا معرفة طبية أعاد اكتشاف علامة سريرية.
+ولهذا اخترنا نموذجاً قابلاً للتفسير.
+فالشبكة العميقة لا تستطيع الإجابة عن هذا السؤال.
+\end{Arabic}
+\clearpage
+
+% ---------------- Slide 13 ----------------
+\slidehead{Slide 13 --- Italy: a frozen model, a trap, and a puzzle}{target 1:15}
+We froze the model. No retraining. No adjustment.
+Then we tested it on an Italian corpus. Sixty-one speakers.
+First, inspection caught a trap.
+Every high-quality file belonged to a patient.
+The model could win by detecting the microphone.
+So we limited all audio to sixteen kilohertz.
+The result: area under the curve 0.701.
+Balanced accuracy 0.629.
+Performance dropped, but did not collapse.
+Now a puzzle. Look at the young healthy speakers.
+They scored higher than the real patients. Why?
+[Pause. Let them think.]
+Medically, this is impossible.
+So the score follows the recording, not the disease.
+That is the strongest argument for caution.
+\arstart
+\begin{Arabic}
+جمّدنا النموذج. بلا إعادة تدريب. وبلا تعديل.
+ثم اختبرناه على قاعدة إيطالية. واحد وستون متحدثاً.
+أولاً، كشف الفحص فخّاً.
+كل ملف عالي الجودة كان لمريض.
+كان يمكن للنموذج أن يفوز بكشف الميكروفون.
+لذلك حددنا كل الصوتيات عند ستة عشر كيلوهرتز.
+والنتيجة: المساحة تحت المنحنى \textenglish{0.701}.
+والدقة المتوازنة \textenglish{0.629}.
+انخفض الأداء، لكنه لم ينهَر.
+والآن لغز. انظروا إلى الشباب الأصحّاء.
+حصلوا على درجات أعلى من المرضى الحقيقيين. لماذا؟
+[توقّف. دعهم يفكرون.]
+طبياً، هذا مستحيل.
+إذن الدرجة تتبع التسجيل، لا المرض.
+وهذه أقوى حجة للحذر.
+\end{Arabic}
+\clearpage
+
+% ---------------- Slide 14 ----------------
+\slidehead{Slide 14 --- A system that refuses to guess}{target 0:45}
+This is the working prototype.
+The disclaimer appears before any input.
+Scores between 0.35 and 0.65 give ``inconclusive''.
+Remember the Italian test.
+Every elderly healthy speaker landed in that band.
+One hundred percent of them.
+The system refused to mislabel them.
+Refusing to answer is a feature, not a failure.
+\arstart
+\begin{Arabic}
+هذا هو النموذج الأولي وهو يعمل.
+يظهر التنويه قبل أي إدخال.
+والدرجات بين \textenglish{0.35} و\textenglish{0.65} تعطي «غير حاسم».
+تذكّروا الاختبار الإيطالي.
+كل متحدث سليم كبير في السن وقع في هذا النطاق.
+مئة بالمئة منهم.
+رفض النظام أن يصنّفهم تصنيفاً خاطئاً.
+ورفض الإجابة ميزة، وليس فشلاً.
+\end{Arabic}
+\clearpage
+
+% ---------------- Demo slide (optional) ----------------
+\slidehead{Optional demo slide}{no time budget --- about 1:30 if used}
+Use this slide only if time allows.
+Say: I can show the system live.
+Run the command line on a corpus recording.
+The analysis takes about one minute.
+Talk over the wait: the pipeline is extracting features now.
+If anything misbehaves, stay calm.
+Say: the screenshots on the previous slide show the same result.
+Then continue to the closing slide.
+\arstart
+\begin{Arabic}
+استخدم هذه الشريحة فقط إذا سمح الوقت.
+قل: أستطيع عرض النظام مباشرة.
+شغّل سطر الأوامر على تسجيل من قاعدة البيانات.
+يستغرق التحليل نحو دقيقة واحدة.
+تكلّم أثناء الانتظار: الأنبوب يستخرج الخصائص الآن.
+وإذا تعطّل شيء، فابقَ هادئاً.
+قل: لقطات الشاشة في الشريحة السابقة تعرض النتيجة نفسها.
+ثم انتقل إلى شريحة الختام.
+\end{Arabic}
+\clearpage
+
+% ---------------- Slide 15 ----------------
+\slidehead{Slide 15 --- What this is, and is not}{target 0:35}
+Let me close with what this system is not.
+It does not diagnose. Many conditions change a voice.
+It was trained on thirty-seven people, one language.
+Now my single main message.
+On small voice datasets, validation design moves the number
+more than model engineering does.
+An honest \textcolor{honest}{0.822} is worth more than an inflated one.
+Thank you.
+\arstart
+\begin{Arabic}
+أختم بما ليس عليه هذا النظام.
+إنه لا يشخّص. فحالات كثيرة تغيّر الصوت.
+وقد تدرّب على سبعة وثلاثين شخصاً وبلغة واحدة.
+والآن رسالتي الأساسية الوحيدة.
+في قواعد البيانات الصوتية الصغيرة، يحرّك تصميمُ التحقّق الرقمَ
+أكثر مما تحرّكه هندسة النموذج.
+ورقم أمين قدره \textenglish{0.822} أثمن من رقم مضخَّم.
+شكراً لكم.
+\end{Arabic}
+\clearpage
+
+% ================= BACKUP SLIDES (Q&A) =================
+\slidehead{Backup 1 --- Why 82\% and not 95\%?}{Q\&A only}
+Published high numbers usually split recordings, not people.
+We measured that effect: 0.909 leaky against 0.775 honest.
+Our 0.822 is measured on people the model never heard.
+\arstart
+\begin{Arabic}
+الأرقام العالية المنشورة تُقسّم التسجيلات عادة، لا الأشخاص.
+وقد قسنا هذا الأثر: \textenglish{0.909} بالتسريب مقابل \textenglish{0.775} بأمانة.
+ورقمنا \textenglish{0.822} مقيس على أشخاص لم يسمعهم النموذج.
+\end{Arabic}
+\clearpage
+
+\slidehead{Backup 2 --- Why not deep learning?}{Q\&A only}
+Thirty-seven subjects is far too few for deep networks.
+Our model can name the measurements it used.
+Our small neural network collapsed in the confounder test.
+\arstart
+\begin{Arabic}
+سبعة وثلاثون شخصاً عدد أقل بكثير مما تحتاجه الشبكات العميقة.
+ونموذجنا يستطيع تسمية القياسات التي اعتمد عليها.
+وشبكتنا العصبية الصغيرة انهارت في اختبار العامل المُربك.
+\end{Arabic}
+\clearpage
+
+\slidehead{Backup 3 --- Why balanced accuracy?}{Q\&A only}
+Our classes are not equal in size.
+``Always healthy'' scores 0.575 accuracy and finds nobody.
+Balanced accuracy exposes that model with 0.500.
+\arstart
+\begin{Arabic}
+مجموعتانا غير متساويتين في الحجم.
+ونموذج «الجميع أصحّاء» يحقق دقة \textenglish{0.575} ولا يجد أحداً.
+والدقة المتوازنة تفضحه بإعطائه \textenglish{0.500}.
+\end{Arabic}
+\clearpage
+
+\slidehead{Backup 4 --- Why reject the 0.840 ensemble?}{Q\&A only}
+The margin of 0.02 was fixed before any experiment.
+The ensemble won by 0.018, less than seed noise of 0.03.
+Choosing the most complex of tied options fits the test, not the problem.
+\arstart
+\begin{Arabic}
+هامش \textenglish{0.02} ثُبّت قبل أي تجربة.
+والنموذج التجميعي تفوّق بمقدار \textenglish{0.018}، أقل من ضجيج البذور البالغ \textenglish{0.03}.
+واختيار الأعقد من خيارات متعادلة يلائم الاختبار، لا المشكلة.
+\end{Arabic}
+\clearpage
+
+\slidehead{Backup 5 --- Can it diagnose Parkinson's?}{Q\&A only}
+No, and it is not designed to.
+Colds, ageing, smoking, and fatigue also change a voice.
+It reports similarity to research groups; clinicians make diagnoses.
+\arstart
+\begin{Arabic}
+لا، وليس مصمّماً لذلك.
+فالزكام والتقدّم في العمر والتدخين والإرهاق تغيّر الصوت أيضاً.
+هو يُبلّغ عن التشابه مع مجموعات بحثية؛ والأطباء هم من يشخّصون.
+\end{Arabic}
+\clearpage
+
+\slidehead{Backup 6 --- Is 37 subjects too few?}{Q\&A only}
+Yes, and we say so openly in the report.
+We compensated: grouped validation, three seeds, spread reported.
+And we tested externally on sixty-one more speakers.
+\arstart
+\begin{Arabic}
+نعم، ونقول ذلك صراحة في التقرير.
+وقد عوّضنا: تحقّق مجمَّع، وثلاث بذور، وذكرنا التشتّت.
+واختبرنا خارجياً على واحد وستين متحدثاً إضافياً.
+\end{Arabic}
+\clearpage
+
+\slidehead{Backup 7 --- Is it detecting male vs female voices?}{Q\&A only}
+Absolute pitch does encode the speaker's sex.
+So we removed those four features and re-ran everything.
+Our model held: 0.768 to 0.780. The neural network collapsed.
+\arstart
+\begin{Arabic}
+النبرة المطلقة تعكس فعلاً جنس المتحدث.
+لذلك حذفنا تلك الخصائص الأربع وأعدنا كل التقييم.
+وصمد نموذجنا: من \textenglish{0.768} إلى \textenglish{0.780}. وانهارت الشبكة العصبية.
+\end{Arabic}
+\clearpage
+
+\slidehead{Backup 8 --- The hardest technical problem?}{Q\&A only}
+Finding the traps that would flatter our results.
+In the Italian corpus, every 44.1 kHz file was a patient.
+We caught it at inspection and band-limited everything to 16 kHz.
+\arstart
+\begin{Arabic}
+أصعب شيء كان إيجاد الفخاخ التي كانت ستجمّل نتائجنا.
+في القاعدة الإيطالية، كل ملف بمعدّل \textenglish{44.1} كيلوهرتز كان لمريض.
+كشفنا ذلك عند الفحص وحددنا نطاق كل الملفات عند \textenglish{16} كيلوهرتز.
+\end{Arabic}
+
+\end{document}
