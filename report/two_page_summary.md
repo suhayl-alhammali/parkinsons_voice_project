@@ -1,9 +1,10 @@
-# Project summary (source text)
+# Project summary (source text) — simplified version
 
 Standalone summary requested by the supervisor.
 Pages 1-2: English. Pages 3-4: Arabic (same content).
-Every number below is verified against `reports/` and `docs/` and matches
-the main report.
+Written for a general academic reader: concepts first, minimal jargon,
+only the numbers that matter. Every figure is verified against
+`reports/` and `docs/`.
 
 ---
 
@@ -17,185 +18,155 @@ Supervisor: Dr. Adel Adyaf
 Control and Instrumentation Division, Department of Biomedical
 Engineering, Faculty of Engineering, University of Tripoli — Spring 2026
 
-## 1. Motivation
+## 1. The problem
 
-Parkinson's disease is the second most common neurodegenerative
-disorder, affecting an estimated 6.1 million people worldwide in 2016,
-more than double the 1990 figure. It is caused by the progressive loss of
-dopamine-producing neurons in brain regions that control movement, and by
-the time the characteristic motor signs appear, a substantial proportion
-of those neurons has already degenerated. No routine laboratory test
-exists; diagnosis remains clinical.
+Parkinson's disease damages the part of the brain that controls
+movement. Its familiar signs are tremor, stiffness, and slowness. What is
+less widely known is that the disease weakens control of *every* muscle,
+including the very small muscles used for breathing, for the vocal folds
+in the throat, and for the tongue and lips.
 
-The same impairment that affects the limbs also affects the small muscles
-of respiration, the larynx, and articulation. The resulting speech
-disorder, hypokinetic dysarthria, is present in roughly 90% of patients,
-and quantitative acoustic analysis has detected vocal impairment in about
-78% of patients with early, untreated disease. A longitudinal case study
-reported measurable reduction of pitch variability in recordings made
-around five years before clinical diagnosis.
+Speech therefore changes. The voice becomes quieter and flatter in pitch,
+sometimes breathy or hoarse; consonants become less precise; pauses
+become more frequent. About nine out of ten patients show some form of
+this speech disorder, and these changes can begin early — in some
+documented cases, years before the movement symptoms are clear enough to
+send a person to a neurologist.
 
-A microphone is inexpensive, non-invasive, and repeatable. If acoustic
-measurements can be related to disease status with useful reliability,
-voice analysis could act as a low-cost screening-support signal, flagging
-individuals for whom a clinical examination is advisable.
+There is no simple laboratory test for Parkinson's disease. Diagnosis
+depends on a specialist examining movement, and by then much of the
+damage has already occurred.
 
-## 2. Objectives
+## 2. The idea
 
-The project set out to inspect and verify a public voice corpus before
-any modelling; to implement, as a core engineering contribution, the
-extraction of acoustic features directly from raw audio; to train and
-compare classical, explainable classifiers; to evaluate them under
-strictly subject-independent validation; to measure rather than assume
-generalisation by testing on a second, foreign corpus; and to deliver a
-prototype whose output communicates its own uncertainty.
+If the disease changes the voice, and if those changes can be measured,
+then a voice recording might act as an early warning sign — not a
+diagnosis, but a reason to see a doctor.
 
-## 3. Methodology
+This is attractive because a microphone is cheap, requires no needles or
+scans, causes no discomfort, and can be used anywhere and repeatedly. The
+question this project asks is simple: **can a computer measure a voice
+recording and tell whether its pattern resembles the voices of people
+with Parkinson's disease or the voices of healthy people?**
 
-**Data.** The MDVR-KCL corpus provides 73 smartphone recordings from 37
-English-speaking participants — 21 healthy controls and 16 patients —
-each performing a read-text task and a spontaneous-dialogue task. All
-files are mono WAV at 44.1 kHz, between 73 and 221 seconds long. Before
-any modelling, an automated inspection verified file integrity, absence
-of duplicate audio by MD5 comparison, agreement between the two
-independent sources of each class label, and the presence of a parseable
-speaker identifier in every filename. All 73 files passed.
+## 3. How the system works
 
-**Preprocessing.** Each recording is conditioned in five fixed steps:
-mono conversion, resampling to 44.1 kHz, DC-offset removal, trimming of
-leading and trailing silence 30 dB below peak, and peak normalisation to
-0.95. No denoising is applied. This is a deliberate scientific decision:
-denoising algorithms work by detecting and suppressing signal
-irregularity, and cycle-to-cycle irregularity is precisely the clinical
-information that the perturbation measures quantify. Aggressive cleaning
-would make a disordered voice appear artificially healthy.
+The system takes an ordinary audio file and passes it through four
+stages.
 
-**Features.** Each recording is divided into consecutive 10-second
-chunks, yielding 1001 chunks in total, and 74 acoustic features are
-extracted from every chunk: fundamental-frequency statistics (7), jitter
-variants (4), shimmer variants (5), harmonics-to-noise ratio (1),
-smoothed cepstral peak prominence (1), pause and timing statistics (4),
-and MFCC and delta-MFCC summaries (52). Each family is chosen for a
-physiological reason — pitch variability for monotone speech, jitter and
-shimmer for unstable vocal-fold control, harmonics-to-noise ratio and
-cepstral peak prominence for incomplete glottal closure, pause statistics
-for disturbed speech timing, and spectral features for imprecise
-articulation. The recording is represented by the mean of its chunks'
-feature vectors. All extraction was implemented within this project; no
-pre-extracted feature set was used. One implementation serves training,
-evaluation, and prediction alike, enforced by a saved configuration
-contract verified before every prediction.
+**First, it cleans the recording** in a standard way: one audio channel,
+one fixed quality setting, silence removed from the beginning and end,
+and the volume levelled so that a loud recording and a quiet one can be
+compared fairly. One thing is deliberately *not* done: noise removal.
+Noise-removal software works by smoothing away irregularities in a
+signal — and small irregularities in the voice are exactly the medical
+evidence being looked for. Cleaning the sound too aggressively would
+erase the very thing being measured.
 
-**Validation.** Every classifier runs inside a pipeline of median
-imputation, standardisation, and the model itself, so that all statistics
-learned from data are fitted on training folds only. Evaluation uses
-stratified grouped 5-fold cross-validation with the speaker identity as
-the grouping variable, repeated with three random seeds, so that no
-person's recordings ever appear on both sides of a split. A runtime
-assertion recomputes the training/test speaker intersection in every fold
-and halts the program if it is non-empty; it never triggered. Balanced
-accuracy is the primary metric, because a model that always answers
-"healthy" would score 0.575 plain accuracy while detecting no patient at
-all.
+**Second, it cuts the recording into ten-second pieces.** Measuring many
+short pieces and averaging them is more reliable than measuring a whole
+recording once, in the same way that taking a person's blood pressure
+several times gives a truer picture than a single reading.
 
-**Selection rules, declared before experimentation.** Identical splits
-for every variant; subject-level balanced accuracy as the primary metric;
-a more complex variant adopted only if it exceeds the simpler one by more
-than 0.02; any result at or above 0.95 halting the study for a leakage
-investigation; and full reporting of all configurations, including
-rejected ones.
+**Third, it measures the voice.** From each piece the system computes 74
+numbers. These are not arbitrary: each one is chosen because it
+corresponds to something physical in the throat and mouth. Some describe
+how high or low the voice is and how much it varies — flat, monotone
+speech is a classic sign of the disease. Some describe how regular the
+vocal folds vibrate, since unstable muscle control produces uneven
+vibration. Some describe how much of the voice is clear tone and how much
+is breathy air, since weakened muscles do not close the vocal folds
+completely. Others describe the rhythm of pauses, and the shape and speed
+of movement of the mouth and tongue.
 
-## 4. Results
+Building this measurement stage was the main engineering work of the
+project. No ready-made set of measurements was downloaded; all of it was
+written and tested as part of this work.
 
-Nineteen configurations were evaluated. The adopted model is a
-default-settings Random Forest on the 74 chunk-averaged features,
-reaching a subject-level balanced accuracy of 0.822 ± 0.032, sensitivity
-0.771, specificity 0.873, and ROC-AUC 0.864 — an improvement of 0.042
-over the whole-recording baseline. A soft-voting ensemble scored higher
-at 0.840, but was rejected because it exceeded the winner by only 0.018,
-less than the pre-declared margin and smaller than the observed
-seed-to-seed variability of about 0.03. Hyperparameter tuning did not
-improve on default settings at all; the genuine gains came from the
-continuous-speech features and chunk averaging.
+**Fourth, it learns and judges.** The 74 numbers from many people, with
+their known group, are given to a machine learning model, which finds the
+patterns that separate the two groups. The model used is a deliberately
+simple and transparent one, so that it can be asked afterwards *which
+measurements it relied on* — an answer that a modern "deep learning"
+system could not give.
 
-The model is interpretable. Its most important feature is the
-fundamental-frequency range, the direct acoustic correlate of the
-monotone, prosodically flattened speech that clinical descriptions
-identify as a hallmark of the disease, followed by the pitch maximum and
-by variability measures of the spectral envelope and its dynamics.
-Variability features consistently outrank averages, which is consistent
-with reduced articulatory movement rather than a shifted average
-spectrum.
+## 4. The central question: how do you test it honestly?
 
-A confounder check was also performed. Because the corpus carries no
-verified sex metadata and absolute pitch partly encodes speaker sex, the
-whole evaluation was repeated with the four absolute-pitch features
-removed. The selected model was unaffected (0.768 to 0.780), showing that
-its decisions rest on perturbation and spectral information; a small
-neural network, by contrast, collapsed from 0.671 to 0.526, revealing
-that it had been relying on the potential confound, and was excluded from
-further work.
+This is where most of the project's effort went, and it is its main
+scientific contribution.
 
-## 5. Two findings that carry more weight than the headline number
+A model must be tested on people it has never seen. If it is tested on
+people it was trained on, a high score proves nothing — like a student
+who is given the exam questions in advance.
 
-**Validation design dominates reported performance.** The identical
-pipeline and model were evaluated twice, changing only the split: 0.775
-balanced accuracy under the correct speaker-grouped split against 0.909
-under a deliberately incorrect chunk-level split. The 0.13 inflation is
-produced entirely by the split — it measures recognition of recordings
-the model has partly seen, not detection of disease — and it exceeds all
-genuine improvements achieved in this project combined. This is the
-measured explanation for why many published results on comparable data
-report 95% or more.
+The dataset used here contains two recordings from each person. The
+danger is subtle: if one recording of a person is used for training and
+the other for testing, the model can succeed simply by *recognising that
+person's voice*, rather than by detecting the disease. It would then look
+excellent on this data and fail completely on anyone new. This is called
+data leakage.
 
-**Generalisation was measured, not assumed.** The frozen model, with no
-retraining and no threshold adjustment, was tested on an independent
-Italian corpus of 61 speakers in a different language, recorded with
-different equipment. Inspection first revealed a trap: every 44.1 kHz
-file in that corpus belongs to the patient group while all healthy files
-are 16 kHz, so a model could have separated the groups by recording
-bandwidth alone. All audio was therefore band-limited to 16 kHz before
-evaluation. The result was 0.701 ROC-AUC and 0.629 balanced accuracy on
-the age-fair comparison — evidence that a genuine, transferable acoustic
-signal survives domain shift, together with an honest measurement of how
-much is lost to it.
+The project prevents it strictly: every recording of a person always
+stays on the same side of the divide, and the program contains a check
+that stops it immediately if this rule is ever broken.
 
-## 6. Prototype
+The size of the problem was then *measured*, not merely asserted. The
+same system, the same model, the same data were run twice, changing only
+how the data was divided. Divided correctly, the result was 0.775.
+Divided incorrectly, it was 0.909. That difference is not skill; it is
+memorisation. This single comparison explains why many published studies
+in this field report accuracies of 95% or more, and why this project's
+lower number is the more trustworthy one.
 
-A browser application and a command-line tool share a single prediction
-function, so the two interfaces cannot diverge. Scores between 0.35 and
-0.65 are reported as inconclusive rather than as a class; warnings are
-attached for sample-rate mismatch, clipping, low signal-to-noise ratio,
-and very short recordings; and no audio is retained, uploaded files being
-deleted immediately after analysis. In the external test, this design
-placed 100% of elderly healthy speakers in the inconclusive band instead
-of confidently mislabelling them — the intended behaviour for input far
-outside the system's experience.
+## 5. What was found
 
-## 7. Limitations and scope
+Working with recordings from 37 people, the final system judges a person
+correctly about 82% of the time — measured only on people it had never
+encountered. When asked which measurement mattered most, it answered:
+the range of pitch variation. That is precisely the flat, monotone speech
+that doctors have described as a hallmark of the disease for decades. A
+system built without any medical knowledge rediscovered a known clinical
+sign.
 
-The dominant limitation is sample size: 37 training subjects from one
-recording setup and one language, without demographic metadata or disease
-severity, so the system's sensitivity to early cases specifically remains
-unmeasured. The perturbation measures are used on continuous speech
-although they were defined for sustained vowels. Scores are not
-calibrated probabilities. One external corpus is a single data point
-about generalisation, not a characterisation of it.
+The system was then given a much harder test. It was frozen — no
+retraining, no adjustment — and applied to a completely different
+collection of recordings from Italy: different language, different
+microphones, different rooms. Performance dropped, as expected, but did
+not collapse: given one patient and one healthy person at random, the
+system still ranked the patient as more likely about 70% of the time.
+Some genuine, transferable information about the voice is therefore being
+captured, and the cost of changing conditions was measured rather than
+guessed.
 
-The system is a non-diagnostic research screening-support prototype. It
-reports the similarity of an acoustic pattern to dataset groups. It does
-not diagnose Parkinson's disease, does not measure any person's medical
-risk, and cannot replace evaluation by a qualified healthcare
-professional.
+Two decisions in the project are worth noting because they went against
+the temptation to report a bigger number. First, a more complicated
+combination of models scored slightly higher, and was rejected: the rules
+for accepting an improvement had been fixed in advance, and the
+difference was too small to be distinguished from chance. Second, the
+programme reports "inconclusive" instead of an answer whenever the
+evidence is weak. In the Italian test, this meant that *every single*
+healthy elderly speaker received "I cannot tell" rather than a confident
+wrong label.
 
-## 8. Conclusion
+## 6. What this system is not
 
-On small voice corpora, the choice of validation scheme moves reported
-performance more than model engineering does. An honestly validated 0.822
-on unseen people, accompanied by a measured cross-corpus 0.701 AUC and an
-interface that declines to answer when uncertain, is a stronger
-scientific result than an inflated figure — and the appropriate
-foundation for any future clinical development.
+It does not diagnose Parkinson's disease, and it is not designed to.
+Many other things change a voice — a cold, a sore throat, ageing,
+smoking, tiredness. The system reports only that a recording's acoustic
+pattern resembles one group in a research dataset more than the other.
+
+Its limits are stated openly: 37 people is a small number, all recorded
+with one device in one language; the system has never been tested on
+people in the earliest stage of the disease specifically; and its score
+is not a probability of illness.
+
+The honest summary is this. Measurable properties of speech do differ
+between people with Parkinson's disease and healthy people. A simple,
+explainable model can use those differences with roughly 82% accuracy on
+people it has never heard, and roughly 70% of that ability survives a
+move to another country and language. And a responsible system, faced
+with a voice unlike anything it was trained on, should say so rather than
+guess.
 
 ---
 
@@ -212,166 +183,127 @@ these pages.
 شعبة التحكم والقياس، قسم الهندسة الطبية الحيوية، كلية الهندسة، جامعة
 طرابلس — فصل ربيع 2026
 
-## 1. الدافع
+## 1. المشكلة
 
-مرض باركنسون هو ثاني أكثر الأمراض التنكّسية العصبية شيوعاً، وقُدِّر عدد
-المصابين به في العالم بنحو 6.1 مليون شخص سنة 2016، أي أكثر من ضعف عددهم
-سنة 1990. وسببه الفقدان التدريجي للخلايا العصبية المنتجة للدوبامين في
-مناطق الدماغ المسؤولة عن التحكم بالحركة. وعند ظهور العلامات الحركية
-المميّزة يكون جزء كبير من تلك الخلايا قد فُقد بالفعل. ولا يوجد فحص مخبري
-روتيني للمرض، فالتشخيص يبقى سريرياً.
+يُتلف مرض باركنسون الجزء من الدماغ المسؤول عن التحكم بالحركة. وأعراضه
+المعروفة هي الرعاش والتيبّس وبطء الحركة. لكن الأقل شهرة أن المرض يُضعف
+التحكم في **كل** عضلة في الجسم، بما فيها العضلات الصغيرة جداً المستخدمة
+في التنفّس، وفي تحريك الحبال الصوتية داخل الحنجرة، وفي تحريك اللسان
+والشفتين.
 
-والخلل نفسه الذي يصيب الأطراف يصيب أيضاً العضلات الصغيرة المسؤولة عن
-التنفّس والحنجرة ومخارج الحروف. ويُسمّى اضطراب الكلام الناتج عن ذلك «عُسر
-التلفّظ ناقص الحركة»، وهو موجود لدى نحو تسعين بالمئة من المرضى. وقد كشف
-التحليل الصوتي الكمّي وجود اضطراب صوتي لدى نحو ثمانية وسبعين بالمئة من
-المرضى في المرحلة المبكّرة غير المعالَجة. كما أشارت دراسة حالة طولية إلى
-انخفاض قابل للقياس في تغيّرية النبرة في تسجيلات أُخذت قبل التشخيص السريري
-بنحو خمس سنوات.
+ولذلك يتغيّر الكلام. فيصبح الصوت أخفض وأكثر رتابة في النبرة، وقد يصير
+مهموساً أو مبحوحاً، وتصير الحروف الساكنة أقل دقة، وتكثر التوقّفات. ويظهر
+شكل من أشكال هذا الاضطراب لدى نحو تسعة من كل عشرة مرضى. وقد تبدأ هذه
+التغيّرات مبكراً، بل رُصدت في حالات موثّقة قبل سنوات من وضوح الأعراض
+الحركية بما يكفي لدفع المريض إلى زيارة طبيب أعصاب.
 
-والميكروفون رخيص وغير جارح ويمكن تكراره بسهولة. فإذا أمكن ربط القياسات
-الصوتية بحالة المرض بموثوقية مفيدة، فقد يعمل تحليل الصوت إشارةً لدعم
-الفرز منخفض التكلفة، تُشير إلى الأشخاص الذين يُستحسن أن يخضعوا لفحص
-سريري.
+ولا يوجد فحص مخبري بسيط لمرض باركنسون. فالتشخيص يعتمد على فحص مختصّ
+للحركة، وعند ذلك يكون جزء كبير من الضرر قد وقع بالفعل.
 
-## 2. الأهداف
+## 2. الفكرة
 
-هدف المشروع إلى فحص قاعدة بيانات صوتية عامة والتحقّق منها قبل أي نمذجة،
-وإلى تنفيذ استخراج الخصائص الصوتية من الصوت الخام بوصفه المساهمة الهندسية
-الأساسية، وإلى تدريب مصنّفات كلاسيكية قابلة للتفسير ومقارنتها، وإلى
-تقييمها بتحقّق مستقل تماماً عن المتحدث، وإلى قياس قدرة التعميم بدل
-افتراضها عبر الاختبار على قاعدة بيانات أجنبية ثانية، وإلى تقديم نموذج
-أولي يُبلّغ عن عدم يقينه.
+إذا كان المرض يغيّر الصوت، وإذا أمكن قياس هذه التغيّرات، فقد يصلح تسجيل
+صوتي بوصفه علامة إنذار مبكّر. لا تشخيصاً، بل سبباً لزيارة الطبيب.
 
-## 3. المنهجية
+وهذه الفكرة جذابة لأن الميكروفون رخيص، ولا يحتاج إبراً ولا أشعة، ولا يسبّب
+أي ألم، ويمكن استخدامه في أي مكان وتكراره متى شئنا. والسؤال الذي يطرحه
+هذا المشروع بسيط: **هل يستطيع الحاسوب أن يقيس تسجيلاً صوتياً ويقول إن نمطه
+يشبه أصوات المصابين بمرض باركنسون أم يشبه أصوات الأشخاص الأصحّاء؟**
 
-**البيانات.** توفّر قاعدة البيانات MDVR-KCL ثلاثة وسبعين تسجيلاً بالهاتف
-المحمول من سبعة وثلاثين مشاركاً ناطقاً بالإنجليزية: واحد وعشرون سليماً
-وستة عشر مريضاً، أدّى كل منهم مهمة قراءة نصّ ومهمة حوار عفوي. وجميع
-الملفات بصيغة WAV أحادية القناة بمعدّل 44.1 كيلوهرتز، وتتراوح مدّتها بين
-ثلاث وسبعين ومئتين وإحدى وعشرين ثانية. وقبل أي نمذجة، تحقّق فحص آلي من
-سلامة الملفات، ومن خلوّها من التكرار عبر مقارنة بصمات MD5، ومن تطابق
-مصدرَي التسمية المستقلّين لكل ملف، ومن وجود معرّف متحدث قابل للاستخراج في
-كل اسم ملف. واجتازت الملفات الثلاثة والسبعون جميع الفحوص.
+## 3. كيف يعمل النظام
 
-**المعالجة المسبقة.** يمرّ كل تسجيل بخمس خطوات ثابتة: التحويل إلى قناة
-واحدة، وتوحيد معدّل العيّنات عند 44.1 كيلوهرتز، وإزالة الانزياح المستمر،
-وقصّ الصمت من بداية التسجيل ونهايته عند ثلاثين ديسيبل تحت القمة، والتطبيع
-إلى قمة قدرها 0.95. ولم تُطبَّق أي إزالة للضجيج، وهذا قرار علمي مقصود:
-فخوارزميات إزالة الضجيج تعمل بكشف عدم الانتظام في الإشارة وكبته، وعدم
-الانتظام بين دورة وأخرى هو بالضبط المعلومة السريرية التي تقيسها خصائص
-الاضطراب. ولو طُبِّق تنظيف عدواني لبدا الصوت المضطرب سليماً بشكل مصطنع.
+يأخذ النظام ملفاً صوتياً عادياً ويمرّره بأربع مراحل.
 
-**الخصائص.** يُقطَّع كل تسجيل إلى مقاطع متتابعة مدّتها عشر ثوانٍ، فينتج
-عن ذلك ألف ومقطع واحد، وتُستخلص من كل مقطع أربع وسبعون خاصية صوتية:
-إحصاءات التردد الأساسي وعددها سبع، وأنواع الارتجاف وعددها أربعة، وأنواع
-التذبذب وعددها خمسة، ونسبة التوافقيات إلى الضجيج، وبروز القمة الكبسترالية
-المُنعَّم، وإحصاءات التوقّفات وعددها أربع، وملخّصات معاملات الكبستروم على
-مقياس ميل ومشتقاتها وعددها اثنتان وخمسون. ولكل عائلة مبرّر فسيولوجي:
-تغيّرية النبرة لرتابة الكلام، والارتجاف والتذبذب لعدم استقرار التحكم في
-الحبال الصوتية، ونسبة التوافقيات إلى الضجيج وبروز القمة الكبسترالية لعدم
-اكتمال إغلاق المزمار، وإحصاءات التوقّفات لاضطراب إيقاع الكلام، والخصائص
-الطيفية لعدم دقة مخارج الحروف. ويُمثَّل التسجيل بمتوسط متّجهات خصائص
-مقاطعه. وقد نُفِّذ الاستخراج كلّه ضمن هذا المشروع، ولم تُستخدم أي مجموعة
-خصائص جاهزة. ويُستعمل تطبيق برمجي واحد للتدريب والتقييم والتنبّؤ معاً،
-ويُفرَض ذلك بعقد إعدادات محفوظ يُتحقَّق منه قبل كل تنبّؤ.
+**أولاً، ينظّف التسجيل** بطريقة موحّدة: قناة صوتية واحدة، وإعداد جودة
+ثابت، وحذف الصمت من بداية التسجيل ونهايته، وتسوية مستوى الصوت حتى يمكن
+مقارنة تسجيل مرتفع بتسجيل منخفض مقارنة عادلة. وهناك أمر واحد **لا** يُفعل
+عمداً: إزالة الضجيج. فبرامج إزالة الضجيج تعمل بتنعيم عدم الانتظام في
+الإشارة، وعدم الانتظام الصغير في الصوت هو بالضبط الدليل الطبي الذي نبحث
+عنه. فالتنظيف المبالغ فيه يمحو الشيء الذي نريد قياسه.
 
-**التحقّق.** يعمل كل مصنّف داخل أنبوب مكوّن من سدّ القيم الناقصة
-بالوسيط، ثم التقييس، ثم النموذج نفسه، بحيث تُقدَّر كل الإحصاءات المتعلّمة
-من بيانات التدريب وحدها في كل طيّة. ويستخدم التقييم تحقّقاً متقاطعاً
-مجمَّعاً ومطبَّقاً على خمس طيّات، بمعرّف المتحدث بوصفه متغيّر التجميع،
-مكرَّراً بثلاث بذور عشوائية، بحيث لا تظهر تسجيلات أي شخص على جانبي أي
-تقسيم. ويعيد تأكيد برمجي حساب تقاطع متحدّثي التدريب والاختبار في كل
-طيّة، ويوقف البرنامج إن لم يكن التقاطع فارغاً، ولم يُفعَّل هذا التأكيد
-قطّ. والدقة المتوازنة هي المقياس الأساسي، لأن نموذجاً يجيب دائماً بأن
-الشخص سليم يحقّق دقة عادية قدرها 0.575 دون أن يكتشف أي مريض.
+**ثانياً، يقطّع التسجيل إلى قطع مدّتها عشر ثوانٍ.** فقياس عدة قطع قصيرة ثم
+أخذ متوسّطها أوثق من قياس التسجيل كاملاً مرة واحدة، تماماً كما أن قياس ضغط
+دم شخص عدة مرات يعطي صورة أصدق من قياس واحد.
 
-**قواعد الاختيار المُعلنة قبل التجارب.** تقسيمات متطابقة لكل المتغيّرات،
-والدقة المتوازنة على مستوى الشخص مقياساً أساسياً، وعدم اعتماد أي متغيّر
-أعقد إلا إذا تجاوز الأبسط بأكثر من 0.02، وإيقاف الدراسة للتحقيق في تسريب
-البيانات عند بلوغ أي نتيجة 0.95 فأكثر، والإبلاغ عن كل التكوينات بما فيها
-المرفوضة.
+**ثالثاً، يقيس الصوت.** يحسب النظام من كل قطعة أربعة وسبعين رقماً. وهذه
+الأرقام ليست اعتباطية، بل اختير كل واحد منها لأنه يقابل شيئاً مادياً يحدث
+في الحنجرة والفم. فبعضها يصف مدى ارتفاع الصوت أو انخفاضه ومقدار تغيّره،
+لأن الكلام المسطّح الرتيب علامة كلاسيكية للمرض. وبعضها يصف مدى انتظام
+اهتزاز الحبال الصوتية، لأن التحكم العضلي غير المستقر ينتج اهتزازاً غير
+منتظم. وبعضها يصف كم من الصوت نغمة صافية وكم منه هواء مهموس، لأن العضلات
+الضعيفة لا تُغلق الحبال الصوتية إغلاقاً كاملاً. وبعضها الآخر يصف إيقاع
+التوقّفات، وشكل حركة الفم واللسان وسرعتها.
 
-## 4. النتائج
+وبناء مرحلة القياس هذه هو العمل الهندسي الأساسي في المشروع. فلم تُحمَّل أي
+مجموعة قياسات جاهزة، بل كُتبت كلها واختُبرت ضمن هذا العمل.
 
-جرى تقييم تسعة عشر تكويناً. والنموذج المعتمد هو غابة عشوائية بإعدادات
-افتراضية على الخصائص الأربع والسبعين المأخوذة بالمتوسط، وقد بلغ دقة
-متوازنة على مستوى الشخص قدرها 0.822 بانحراف معياري 0.032، وحساسية 0.771،
-ونوعية 0.873، ومساحة تحت المنحنى قدرها 0.864، أي بتحسّن قدره 0.042 عن
-الخط الأساسي المحسوب على التسجيل كاملاً. وحقّق نموذج تجميعي نتيجة أعلى
-قدرها 0.840، لكنه رُفض لأنه تجاوز الفائز بمقدار 0.018 فقط، وهو أقل من
-الهامش المُعلن مسبقاً وأصغر من التباين المرصود بين البذور والبالغ نحو
-0.03. ولم يُحسِّن ضبط المعاملات الفائقة النتيجة عن الإعدادات الافتراضية
-إطلاقاً، بل جاء التحسّن الحقيقي من خصائص الكلام المتّصل ومن أخذ متوسط
-المقاطع.
+**رابعاً، يتعلّم ويحكم.** تُعطى الأرقام الأربعة والسبعون الخاصة بأشخاص
+كثيرين، مع معرفة المجموعة التي ينتمي إليها كل منهم، إلى نموذج تعلّم آلة،
+فيكتشف الأنماط التي تفرّق بين المجموعتين. والنموذج المستخدم بسيط وشفاف
+عن قصد، حتى يمكن أن نسأله بعد ذلك: **على أي قياسات اعتمدت؟** وهو سؤال لا
+يستطيع نظام «التعلّم العميق» الحديث أن يجيب عنه.
 
-والنموذج قابل للتفسير. فأهم خصائصه هي مدى التردد الأساسي، وهو المقابل
-الصوتي المباشر لرتابة النبرة وانبساط التنغيم اللذين تصفهما المراجع
-السريرية بوصفهما علامة مميّزة للمرض، يليه أعلى قيمة للنبرة، ثم مقاييس
-تغيّرية الغلاف الطيفي وديناميكياته. وتتفوّق خصائص التغيّرية على خصائص
-المتوسط باستمرار، وهو ما يتّسق مع نقص سعة حركة أعضاء النطق لا مع انزياح
-في متوسط الطيف.
+## 4. السؤال المركزي: كيف نختبره بأمانة؟
 
-وأُجري كذلك فحص للعامل المُربك. فلأن قاعدة البيانات لا تحمل بيانات موثّقة
-عن جنس المتحدث، ولأن النبرة المطلقة تعكس جنس المتحدث جزئياً، أُعيد
-التقييم كاملاً بعد حذف خصائص النبرة المطلقة الأربع. ولم يتأثّر النموذج
-المختار، إذ انتقل من 0.768 إلى 0.780، ممّا يدلّ على أن قراراته تستند إلى
-معلومات الاضطراب والطيف. أما شبكة عصبية صغيرة فقد انهارت من 0.671 إلى
-0.526، ممّا كشف اعتمادها على العامل المُربك المحتمل، فاستُبعدت من الأعمال
-اللاحقة.
+هنا ذهب معظم جهد المشروع، وهذه هي مساهمته العلمية الأساسية.
 
-## 5. نتيجتان أثقل وزناً من الرقم الرئيسي
+يجب أن يُختبر أي نموذج على أشخاص لم يرهم من قبل. فإن اختُبر على الأشخاص
+أنفسهم الذين تدرّب عليهم، لم تُثبت الدرجة العالية شيئاً، تماماً كطالب
+أُعطي أسئلة الامتحان قبل الامتحان.
 
-**تصميم التحقّق يحكم الأداء المُعلن.** قُيِّم الأنبوب نفسه والنموذج نفسه
-مرتين، ولم يتغيّر سوى طريقة التقسيم: دقة متوازنة قدرها 0.775 بالتقسيم
-الصحيح المجمَّع حسب المتحدث، مقابل 0.909 بتقسيم خاطئ متعمَّد على مستوى
-المقاطع. والتضخّم البالغ 0.13 ناتج عن التقسيم وحده، إذ يقيس قدرة النموذج
-على التعرّف على تسجيلات رآها جزئياً لا على كشف المرض، وهو يفوق مجموع كل
-التحسينات الحقيقية التي تحقّقت في هذا المشروع. وهذا هو التفسير المقيس
-لسبب إعلان كثير من الأبحاث المنشورة على بيانات مماثلة نتائج تبلغ خمسة
-وتسعين بالمئة أو أكثر.
+وتحتوي قاعدة البيانات المستخدمة هنا على تسجيلين لكل شخص. والخطر دقيق: إذا
+استُخدم أحد تسجيلَي شخص ما في التدريب والآخر في الاختبار، فقد ينجح النموذج
+لمجرّد أنه **تعرّف على صوت ذلك الشخص**، لا لأنه كشف المرض. وعندها يبدو
+ممتازاً على هذه البيانات ويفشل تماماً مع أي شخص جديد. ويُسمّى هذا تسريب
+البيانات.
 
-**قدرة التعميم قيست ولم تُفترَض.** اختُبر النموذج مجمَّداً، بلا إعادة
-تدريب وبلا تعديل للعتبة، على قاعدة بيانات إيطالية مستقلة تضم واحداً
-وستين متحدثاً بلغة أخرى وبأجهزة تسجيل مختلفة. وكشف الفحص أولاً عن فخّ:
-كل ملف بمعدّل 44.1 كيلوهرتز في تلك القاعدة يخصّ مجموعة المرضى، بينما كل
-ملفات الأصحّاء بمعدّل 16 كيلوهرتز، فكان بإمكان النموذج أن يفصل بين
-المجموعتين بعرض النطاق الترددي وحده. ولذلك جرى تحديد نطاق كل الملفات
-الصوتية عند 16 كيلوهرتز قبل التقييم. وكانت النتيجة مساحة تحت المنحنى
-قدرها 0.701 ودقة متوازنة قدرها 0.629 في المقارنة العادلة عمرياً، وهو
-دليل على بقاء إشارة صوتية حقيقية قابلة للانتقال رغم انزياح المجال، مع
-قياس أمين لمقدار ما يُفقد بسببه.
+ويمنعه المشروع منعاً صارماً: فكل تسجيلات الشخص الواحد تبقى دائماً على
+جانب واحد من التقسيم، ويحتوي البرنامج على فحص يوقفه فوراً إن خُرقت هذه
+القاعدة.
 
-## 6. النموذج الأولي
+ثم **قِيس** حجم المشكلة بدل الاكتفاء بادّعائها. فشُغّل النظام نفسه
+والنموذج نفسه والبيانات نفسها مرتين، ولم يتغيّر سوى طريقة تقسيم البيانات.
+فكانت النتيجة بالتقسيم الصحيح 0.775، وبالتقسيم الخاطئ 0.909. وهذا الفرق
+ليس مهارة، بل حفظ. وهذه المقارنة وحدها تفسّر سبب إعلان كثير من الدراسات
+المنشورة في هذا المجال دقّة تبلغ خمسة وتسعين بالمئة أو أكثر، وسبب كون
+الرقم الأقل في هذا المشروع هو الأجدر بالثقة.
 
-يشترك تطبيق المتصفّح وواجهة سطر الأوامر في دالّة تنبّؤ واحدة، فلا يمكن
-للواجهتين أن تختلفا. وتُعرَض النتائج الواقعة بين 0.35 و0.65 بوصفها غير
-حاسمة بدلاً من إعطائها تصنيفاً. وتُرفق تحذيرات عند اختلاف معدّل العيّنات،
-وعند حدوث قَصّ في الإشارة، وعند انخفاض نسبة الإشارة إلى الضجيج، وعند قِصَر
-التسجيل. ولا يُحتفَظ بأي ملف صوتي، إذ تُحذف الملفات المرفوعة فور تحليلها.
-وفي الاختبار الخارجي وضع هذا التصميم مئة بالمئة من المتحدثين الأصحّاء
-كبار السن في النطاق غير الحاسم بدلاً من تصنيفهم تصنيفاً خاطئاً بثقة، وهو
-السلوك المقصود مع مُدخَل بعيد إلى هذا الحدّ عن خبرة النظام.
+## 5. ما الذي وُجد
 
-## 7. القيود والنطاق
+بالعمل على تسجيلات سبعة وثلاثين شخصاً، يحكم النظام النهائي على الشخص حكماً
+صحيحاً في نحو اثنين وثمانين بالمئة من الحالات، مقيسة على أشخاص لم يصادفهم
+قط. وحين سُئل عن أهم قياس اعتمد عليه، كان جوابه: مدى تغيّر النبرة. وهو
+بالضبط الكلام المسطّح الرتيب الذي يصفه الأطباء علامةً مميّزة للمرض منذ
+عقود. أي أن نظاماً بُني بلا أي معرفة طبية أعاد اكتشاف علامة سريرية معروفة.
 
-القيد الأبرز هو حجم العيّنة: سبعة وثلاثون شخصاً في التدريب من إعداد تسجيل
-واحد ولغة واحدة، بلا بيانات ديموغرافية وبلا معلومات عن شدّة المرض، ولذلك
-تبقى حساسية النظام للحالات المبكّرة تحديداً غير مقيسة. كما تُستخدم مقاييس
-الاضطراب على الكلام المتّصل رغم أنها عُرِّفت أصلاً للحروف الممدودة. ودرجات
-النموذج ليست احتمالات معايَرة. وقاعدة بيانات خارجية واحدة تمثّل نقطة
-بيانات واحدة عن التعميم لا وصفاً كاملاً له.
+ثم خضع النظام لاختبار أصعب بكثير. فقد جُمّد، بلا إعادة تدريب وبلا أي
+تعديل، وطُبّق على مجموعة تسجيلات مختلفة تماماً من إيطاليا: لغة مختلفة،
+وميكروفونات مختلفة، وغرف مختلفة. فانخفض الأداء كما هو متوقّع، لكنه لم
+ينهَر: فإذا أُخذ مريض وشخص سليم عشوائياً، ظلّ النظام يرتّب المريض بوصفه
+الأرجح في نحو سبعين بالمئة من الحالات. أي أن هناك معلومة حقيقية عن الصوت
+قابلة للانتقال، وأن كلفة تغيّر الظروف قِيست بدل أن تُخمَّن.
 
-والنظام أداة أولية لدعم الفرز البحثي وغير تشخيصية. فهو يُبلّغ عن مدى
-تشابه نمط صوتي مع مجموعات قاعدة البيانات، ولا يشخّص مرض باركنسون، ولا
-يقيس خطراً طبياً على أي شخص، ولا يمكن أن يحلّ محل تقييم مختصّ رعاية صحية
-مؤهّل.
+وهناك قراران في المشروع يستحقّان الذكر لأنهما خالفا إغراء إعلان رقم أكبر.
+الأول أن تركيبة أعقد من النماذج حقّقت نتيجة أعلى قليلاً، فرُفضت: لأن قواعد
+قبول أي تحسين كانت قد ثُبِّتت مسبقاً، ولأن الفرق كان أصغر من أن يُميَّز عن
+المصادفة. والثاني أن البرنامج يعلن «غير حاسم» بدل إعطاء جواب كلما كان
+الدليل ضعيفاً. وفي الاختبار الإيطالي كان معنى ذلك أن **كل** متحدث سليم كبير
+في السن، بلا استثناء واحد، حصل على «لا أستطيع الجزم» بدل تصنيف خاطئ واثق.
 
-## 8. الخلاصة
+## 6. ما ليس هذا النظام
 
-على قواعد البيانات الصوتية الصغيرة، يُحرّك اختيار مخطّط التحقّق الأداءَ
-المُعلن أكثر ممّا تُحرّكه هندسة النموذج. ونتيجة قدرها 0.822 على أشخاص لم
-يرهم النموذج، متحقَّق منها بأمانة، ومصحوبة بمساحة تحت المنحنى مقيسة عبر
-قاعدتَي بيانات قدرها 0.701، وبواجهة تمتنع عن الإجابة عند عدم اليقين، هي
-نتيجة علمية أقوى من رقم مضخَّم، وهي الأساس المناسب لأي تطوير سريري
-مستقبلي.
+إنه لا يشخّص مرض باركنسون، وليس مصمّماً لذلك. فأشياء كثيرة أخرى تغيّر
+الصوت: زكام، أو التهاب في الحلق، أو تقدّم في العمر، أو تدخين، أو إرهاق.
+وكل ما يُبلّغ عنه النظام هو أن النمط الصوتي لتسجيل ما يشبه إحدى مجموعتَي
+قاعدة بيانات بحثية أكثر من الأخرى.
+
+وحدوده معلنة بصراحة: سبعة وثلاثون شخصاً عدد صغير، وكلهم سُجّلوا بجهاز واحد
+وبلغة واحدة، والنظام لم يُختبر تحديداً على أشخاص في المرحلة الأبكر من
+المرض، ودرجته ليست احتمالاً للإصابة.
+
+والخلاصة الأمينة هي التالية. توجد فعلاً خصائص قابلة للقياس في الكلام تختلف
+بين المصابين بمرض باركنسون والأصحّاء. ويستطيع نموذج بسيط وقابل للتفسير أن
+يستفيد من هذه الفروق بدقة تقارب اثنين وثمانين بالمئة على أشخاص لم يسمعهم
+من قبل، وأن نحو سبعين بالمئة من هذه القدرة تصمد عند الانتقال إلى بلد ولغة
+أخريين. وأن النظام المسؤول، حين يواجه صوتاً لا يشبه شيئاً مما تدرّب عليه،
+ينبغي أن يقول ذلك بدل أن يخمّن.
