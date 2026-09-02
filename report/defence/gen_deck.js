@@ -29,8 +29,20 @@ pres.author = "Suhail Mohamed Alhammali";
 pres.title = "Voice Signal Analysis Using Machine Learning for Early Detection of Parkinson's Disease";
 
 // ---------- helpers ----------
-function bg(s, color) {
-  s.background = { color: color || BG };
+function bg(s, hero) {
+  s.background = { path: path.join(FIGS, hero ? "bg_hero.png" : "bg_main.png") };
+}
+function heroWave(s, yTop, h) {
+  s.addImage({ path: path.join(FIGS, "wave_hero.png"), x: 0, y: yTop, w: W, h: h });
+}
+function iconCircle(s, x, y, d, icon, ringColor) {
+  s.addShape("ellipse", {
+    x, y, w: d, h: d,
+    fill: { color: PANEL2 }, line: { color: ringColor || HONEST, width: 1.25 },
+    shadow: { type: "outer", color: "000000", opacity: 0.35, blur: 7, offset: 2, angle: 90 },
+  });
+  const pad = d * 0.26;
+  s.addImage({ path: path.join(FIGS, icon + ".png"), x: x + pad, y: y + pad, w: d - 2 * pad, h: d - 2 * pad });
 }
 function chip(s, n) {
   s.addText(String(n), {
@@ -99,8 +111,8 @@ function card(s, x, y, w, h, fill) {
 // 1 — TITLE
 // =================================================================
 let s = pres.addSlide();
-bg(s);
-waveform(s, 5.6, 1.6, HONEST);
+bg(s, true);
+heroWave(s, 5.75, 1.75);
 s.addText([
   { text: "Voice Signal Analysis Using Machine Learning\n", options: { fontSize: 33 } },
   { text: "for Early Detection of Parkinson's Disease", options: { fontSize: 33 } },
@@ -168,22 +180,23 @@ bg(s);
 headline(s, "The voice is a cheap, early window");
 chip(s, 3);
 const stats = [
-  ["~90%", "of patients show\nspeech changes"],
-  ["5 yr", "before diagnosis,\nin one documented case"],
-  ["$", "a microphone:\nnon-invasive, repeatable"],
+  ["ic_ear", "~90%", "of patients show\nspeech changes"],
+  ["ic_clock", "5 yr", "before diagnosis,\nin one documented case"],
+  ["ic_mic", "$", "a microphone:\nnon-invasive, repeatable"],
 ];
 {
-  const cw = 3.55, chh = 2.6, gap = 0.7;
+  const cw = 3.55, chh = 3.15, gap = 0.7;
   const total = stats.length * cw + (stats.length - 1) * gap;
-  let x = (W - total) / 2, y = 2.1;
-  stats.forEach(([big, small]) => {
+  let x = (W - total) / 2, y = 1.85;
+  stats.forEach(([icon, big, small]) => {
     card(s, x, y, cw, chh);
+    iconCircle(s, x + cw / 2 - 0.42, y - 0.42, 0.84, icon);
     s.addText(big, {
-      x, y: y + 0.35, w: cw, h: 1.15, isTextBox: true, margin: 0,
+      x, y: y + 0.75, w: cw, h: 1.15, isTextBox: true, margin: 0,
       fontFace: HEAD, fontSize: 54, bold: true, color: HONEST, align: "center",
     });
     s.addText(small, {
-      x: x + 0.2, y: y + 1.6, w: cw - 0.4, h: 0.85, isTextBox: true, margin: 0,
+      x: x + 0.2, y: y + 2.05, w: cw - 0.4, h: 0.85, isTextBox: true, margin: 0,
       fontFace: BODY, fontSize: 14, color: MUTED, align: "center",
     });
     x += cw + gap;
@@ -199,14 +212,14 @@ s.addNotes("About ninety percent of patients show speech changes. In one documen
 // 4 — RESEARCH QUESTION (statement)
 // =================================================================
 s = pres.addSlide();
-bg(s);
-waveform(s, 6.1, 1.1, HONEST);
+bg(s, true);
+heroWave(s, 6.3, 1.2);
 chip(s, 4);
 s.addText([
   { text: "Can a computer measure a voice recording\nand tell whether its pattern resembles\n", options: { color: ICE } },
-  { text: "Parkinson's patients", options: { color: WRONG, bold: true } },
+  { text: "Parkinson's patients", options: { color: ICE, bold: true } },
   { text: " — or ", options: { color: ICE } },
-  { text: "healthy speakers", options: { color: HONEST, bold: true } },
+  { text: "healthy speakers", options: { color: ICE, bold: true } },
   { text: "?", options: { color: ICE } },
 ], {
   x: 1.0, y: 2.3, w: W - 2.0, h: 2.4, isTextBox: true, margin: 0,
@@ -298,13 +311,14 @@ bg(s);
 headline(s, [{ text: "We chose ", options: {} }, { text: "not", options: { italic: true } }, { text: " to clean the sound", options: {} }]);
 chip(s, 7);
 pipeStrip(s, 1);
+iconCircle(s, W / 2 - 0.55, 1.95, 1.1, "ic_ban", WRONG);
 s.addText([
   { text: "Denoising suppresses irregularity.\n", options: { color: ICE } },
   { text: "Irregularity ", options: { color: ICE } },
   { text: "is", options: { color: ICE, italic: true } },
   { text: " the evidence.", options: { color: ICE } },
 ], {
-  x: 1.6, y: 2.7, w: W - 3.2, h: 1.3, isTextBox: true, margin: 0,
+  x: 1.6, y: 3.2, w: W - 3.2, h: 1.2, isTextBox: true, margin: 0,
   fontFace: HEAD, fontSize: 26, align: "center", lineSpacing: 40,
 });
 card(s, 2.4, 4.5, W - 4.8, 0.85, PANEL2);
@@ -321,22 +335,21 @@ s = pres.addSlide();
 bg(s);
 headline(s, "A student with the exam questions proves nothing");
 chip(s, 8);
-s.addText("one person, two recordings", {
-  x: 1.2, y: 1.75, w: 4.0, h: 0.4, isTextBox: true, margin: 0,
-  fontFace: BODY, fontSize: 13, italic: true, color: MUTED,
-});
-card(s, 1.4, 2.3, 1.55, 0.85, PANEL);
-s.addText("rec. 1", { x: 1.4, y: 2.3, w: 1.55, h: 0.85, isTextBox: true, margin: 0, fontFace: BODY, fontSize: 15, color: ICE, align: "center", valign: "middle" });
-card(s, 3.25, 2.3, 1.55, 0.85, PANEL);
-s.addText("rec. 2", { x: 3.25, y: 2.3, w: 1.55, h: 0.85, isTextBox: true, margin: 0, fontFace: BODY, fontSize: 15, color: ICE, align: "center", valign: "middle" });
+// person container with two stacked recordings
+s.addShape("roundRect", { x: 1.3, y: 1.95, w: 2.3, h: 3.0, rectRadius: 0.08, fill: { color: PANEL, transparency: 60 }, line: { color: STROKE, width: 1.25 } });
+s.addText("one person", { x: 1.3, y: 2.05, w: 2.3, h: 0.35, isTextBox: true, margin: 0, fontFace: BODY, fontSize: 12.5, italic: true, color: MUTED, align: "center" });
+card(s, 1.55, 2.5, 1.8, 0.85, PANEL);
+s.addText("recording 1", { x: 1.55, y: 2.5, w: 1.8, h: 0.85, isTextBox: true, margin: 0, fontFace: BODY, fontSize: 14, color: ICE, align: "center", valign: "middle" });
+card(s, 1.55, 3.7, 1.8, 0.85, PANEL);
+s.addText("recording 2", { x: 1.55, y: 3.7, w: 1.8, h: 0.85, isTextBox: true, margin: 0, fontFace: BODY, fontSize: 14, color: ICE, align: "center", valign: "middle" });
 // destination boxes
-card(s, 7.3, 1.75, 1.9, 0.8, PANEL2);
-s.addText("training", { x: 7.3, y: 1.75, w: 1.9, h: 0.8, isTextBox: true, margin: 0, fontFace: BODY, fontSize: 15, bold: true, color: WRONG, align: "center", valign: "middle" });
-card(s, 7.3, 3.1, 1.9, 0.8, PANEL2);
-s.addText("test", { x: 7.3, y: 3.1, w: 1.9, h: 0.8, isTextBox: true, margin: 0, fontFace: BODY, fontSize: 15, bold: true, color: WRONG, align: "center", valign: "middle" });
-// arrows rec1->training, rec2->test
-s.addShape("line", { x: 2.95, y: 2.1, w: 4.35, h: 0.45, flipV: true, line: { color: WRONG, width: 2.2, endArrowType: "arrow" } });
-s.addShape("line", { x: 4.8, y: 2.9, w: 2.5, h: 0.6, line: { color: WRONG, width: 2.2, endArrowType: "arrow" } });
+card(s, 7.3, 2.2, 1.9, 0.8, PANEL2);
+s.addText("training", { x: 7.3, y: 2.2, w: 1.9, h: 0.8, isTextBox: true, margin: 0, fontFace: BODY, fontSize: 15, bold: true, color: WRONG, align: "center", valign: "middle" });
+card(s, 7.3, 3.55, 1.9, 0.8, PANEL2);
+s.addText("test", { x: 7.3, y: 3.55, w: 1.9, h: 0.8, isTextBox: true, margin: 0, fontFace: BODY, fontSize: 15, bold: true, color: WRONG, align: "center", valign: "middle" });
+// arrows: recording 1 -> training, recording 2 -> test (no crossing)
+s.addShape("line", { x: 3.35, y: 2.60, w: 3.95, h: 0.33, flipV: true, line: { color: WRONG, width: 2.2, endArrowType: "arrow" } });
+s.addShape("line", { x: 3.35, y: 3.95, w: 3.95, h: 0.18, flipV: true, line: { color: WRONG, width: 2.2, endArrowType: "arrow" } });
 s.addText([
   { text: "the model can win by\nrecognising the ", options: { color: ICE } },
   { text: "person", options: { color: WRONG, italic: true, bold: true } },
@@ -444,28 +457,23 @@ bg(s);
 headline(s, "The rules were fixed before the experiments");
 chip(s, 11);
 const rules = [
-  "identical splits for every variant",
-  "adoption margin: +0.02",
-  "any result ≥ 0.95: stop, investigate",
-  "all 19 configurations reported",
+  ["ic_scale", "identical splits for every variant"],
+  ["ic_chart", "adoption margin: +0.02"],
+  ["ic_warn", "any result ≥ 0.95: stop, investigate"],
+  ["ic_check", "all 19 configurations reported"],
 ];
 {
-  const cw = 5.6, chh = 0.8, gapx = 0.6, gapy = 0.5;
+  const cw = 5.6, chh = 0.95, gapx = 0.6, gapy = 0.5;
   let idx = 0;
   for (let r = 0; r < 2; r++) for (let c = 0; c < 2; c++) {
     const x = (W - 2 * cw - gapx) / 2 + c * (cw + gapx);
-    const y = 1.85 + r * (chh + gapy);
+    const y = 1.8 + r * (chh + gapy);
     card(s, x, y, cw, chh);
-    s.addShape("ellipse", {
-      x: x + 0.18, y: y + chh / 2 - 0.17, w: 0.34, h: 0.34,
-      fill: { color: HONEST, transparency: 70 }, line: { color: HONEST, width: 1 },
-    });
-    s.addText(String(idx + 1), {
-      x: x + 0.18, y: y + chh / 2 - 0.17, w: 0.34, h: 0.34, isTextBox: true, margin: 0,
-      fontFace: HEAD, fontSize: 13, bold: true, color: ICE, align: "center", valign: "middle",
-    });
-    s.addText(rules[idx], {
-      x: x + 0.68, y, w: cw - 0.85, h: chh, isTextBox: true, margin: 0,
+    const [icon, label] = rules[idx];
+    iconCircle(s, x + 0.18, y + chh / 2 - 0.29, 0.58, icon,
+               icon === "ic_warn" ? WRONG : HONEST);
+    s.addText(label, {
+      x: x + 0.95, y, w: cw - 1.15, h: chh, isTextBox: true, margin: 0,
       fontFace: BODY, fontSize: 15, color: ICE, align: "left", valign: "middle",
     });
     idx++;
@@ -485,12 +493,51 @@ s.addText([
 s.addNotes("We fixed the rules before running anything. Same splits for every variant. A complex variant must win by more than 0.02. Anything above 0.95 stops the study. All nineteen configurations are reported. The best score was 0.840. We rejected it. It won by only 0.018. That is smaller than the noise.");
 
 // =================================================================
-// 12 — FINAL PERFORMANCE
+// 12 — MODEL SELECTION LEADERBOARD
+// =================================================================
+s = pres.addSlide();
+bg(s);
+headline(s, "Nineteen configurations — the winner chosen by rule");
+chip(s, 12);
+{
+  const x0 = 5.0, x1 = 12.15, v0 = 0.74, v1 = 0.88;
+  const X = (v) => x0 + ((v - v0) / (v1 - v0)) * (x1 - x0);
+  const rows = [
+    ["baseline phase — SVM (V0)", 0.780, MUTED, ""],
+    ["chunk features — SVM (V1)", 0.816, MUTED, ""],
+    ["chunk features — tuned RF (V4)", 0.814, MUTED, ""],
+    ["mean+std features — SVM (V6)", 0.824, MUTED, ""],
+    ["tuned SVM+RF ensemble (V5)", 0.840, WRONG, "rejected (+0.018)"],
+    ["chunk features — Random Forest (V1)", 0.822, HONEST, "selected"],
+  ];
+  const yTop = 2.05, rowH = 0.72;
+  const bx = X(0.822), bw2 = X(0.842) - X(0.822);
+  s.addShape("rect", { x: bx, y: yTop - 0.28, w: bw2, h: rows.length * rowH + 0.5, fill: { color: HONEST, transparency: 88 }, line: { type: "none" } });
+  s.addText("adoption margin +0.02", { x: bx - 0.55, y: yTop - 0.62, w: bw2 + 1.1, h: 0.3, isTextBox: true, margin: 0, fontFace: BODY, fontSize: 10.5, color: MUTED, align: "center" });
+  rows.forEach(([label, v, color, tag], i) => {
+    const y = yTop + i * rowH;
+    const big = color === HONEST;
+    s.addText(label, { x: 0.6, y: y - 0.02, w: 4.25, h: 0.4, isTextBox: true, margin: 0, fontFace: BODY, fontSize: big ? 13.5 : 12.5, bold: big, color: big ? ICE : MUTED, align: "right", valign: "middle" });
+    s.addShape("line", { x: x0, y: y + 0.18, w: X(v) - x0, h: 0, line: { color: color, width: big ? 2.6 : 1.4 } });
+    s.addShape("ellipse", { x: X(v) - 0.09, y: y + 0.09, w: 0.18, h: 0.18, fill: { color: color }, line: { type: "none" } });
+    s.addText(v.toFixed(3), { x: X(v) + 0.14, y: y - 0.03, w: 0.85, h: 0.42, isTextBox: true, margin: 0, fontFace: HEAD, fontSize: big ? 16 : 13, bold: true, color: color, valign: "middle" });
+    if (tag) s.addText(tag, { x: X(v) + 0.95, y: y - 0.03, w: 2.05, h: 0.42, isTextBox: true, margin: 0, fontFace: BODY, fontSize: 11, italic: true, color: color, valign: "middle" });
+  });
+  [0.75, 0.80, 0.85].forEach((tk) => {
+    s.addShape("line", { x: X(tk), y: yTop + rows.length * rowH + 0.16, w: 0.001, h: 0.12, line: { color: MUTED, width: 1 } });
+    s.addText(tk.toFixed(2), { x: X(tk) - 0.4, y: yTop + rows.length * rowH + 0.3, w: 0.8, h: 0.3, isTextBox: true, margin: 0, fontFace: BODY, fontSize: 11, color: MUTED, align: "center" });
+  });
+  s.addText("subject-level balanced accuracy, 3-seed mean — six of the 19 configurations shown; all are reported", { x: 0.9, y: yTop + rows.length * rowH + 0.74, w: W - 1.8, h: 0.4, isTextBox: true, margin: 0, fontFace: BODY, fontSize: 12.5, italic: true, color: MUTED, align: "center" });
+}
+s.addNotes("Nineteen configurations were compared under identical splits. Here are the leaders. The ensemble scored highest, 0.840. But it beat the Random Forest by only 0.018, inside the pre-declared margin and inside the noise. So the rule rejected it. The Random Forest at 0.822 was selected. The rule chose the winner, not our preference.");
+
+// =================================================================
+// 13 — FINAL PERFORMANCE
 // =================================================================
 s = pres.addSlide();
 bg(s);
 headline(s, "Judged on people it has never heard");
-chip(s, 12);
+chip(s, 13);
 pipeStrip(s, 4);
 // left tiles
 s.addText([
@@ -529,7 +576,7 @@ s.addNotes("The final model is a Random Forest on the seventy-four measurements.
 s = pres.addSlide();
 bg(s);
 headline(s, "It rediscovered a known clinical sign");
-chip(s, 13);
+chip(s, 14);
 pipeStrip(s, 4);
 s.addText([
   { text: "Top measurement:\n", options: { fontSize: 17, color: MUTED } },
@@ -549,7 +596,7 @@ s.addNotes("We asked the model which measurement mattered most. The answer: pitc
 s = pres.addSlide();
 bg(s);
 headline(s, "Italy: a frozen model, a trap, and a puzzle");
-chip(s, 14);
+chip(s, 15);
 pipeStrip(s, 4);
 const italy = [
   [["Trap caught: ", WRONG], ["every 44.1 kHz file was a patient. Band-limited all audio to 16 kHz.", ICE]],
@@ -579,7 +626,7 @@ s.addNotes("We froze the model and tested it on an Italian corpus. Sixty-one spe
 s = pres.addSlide();
 bg(s);
 headline(s, "A system that refuses to guess");
-chip(s, 15);
+chip(s, 16);
 // screenshot on white card (aspect ratio 1486x1018 = 1.46)
 card(s, 0.8, 1.85, 6.3, 4.8, WHITE);
 s.addImage({ path: path.join(RFIG, "app_result.png"), x: 1.05, y: 2.1, w: 5.8, h: 5.8 / 1.4597 });
@@ -606,35 +653,78 @@ s.addNotes("The prototype never guesses near the boundary. Scores between 0.35 a
 s = pres.addSlide();
 bg(s);
 headline(s, "Optional: live demonstration", { color: MUTED });
-chip(s, 16);
+chip(s, 17);
 const demo = [
   "safest demo: a corpus recording, command line",
   "analysis takes about one minute",
   "fallback: the screenshots on the previous slide carry the same content",
 ];
+// terminal card (exact lines from a real run, verified)
+card(s, 0.8, 1.95, 5.9, 3.6, "081018");
+s.addText([
+  { text: "$ python scripts/predict_file.py ID07_pd_2_0_0.wav\n\n", options: { color: MUTED } },
+  { text: "RESEARCH MODEL RESULT (non-diagnostic)\n", options: { color: ICE, bold: true } },
+  { text: "Duration: 147.7 s, original sample rate 44100 Hz\n\n", options: { color: MUTED } },
+  { text: "The acoustic pattern was classified by the\nresearch model as closer to the PD class.\n", options: { color: ICE } },
+  { text: "Model score for the PD class: 0.96", options: { color: HONEST, bold: true } },
+], {
+  x: 1.1, y: 2.2, w: 5.4, h: 3.2, isTextBox: true, margin: 0,
+  fontFace: "Consolas", fontSize: 12.5, align: "left", lineSpacing: 19,
+});
 {
-  let y = 2.5;
+  let y = 2.45;
   demo.forEach((d) => {
     s.addText([{ text: "▪  ", options: { color: HONEST } }, { text: d, options: { color: ICE } }], {
-      x: 2.2, y, w: 9.2, h: 0.5, isTextBox: true, margin: 0,
-      fontFace: BODY, fontSize: 17, align: "left",
+      x: 7.1, y, w: 5.5, h: 0.85, isTextBox: true, margin: 0,
+      fontFace: BODY, fontSize: 16, align: "left",
     });
-    y += 0.7;
+    y += 0.95;
   });
 }
 s.addText("skip this slide if time is short", {
-  x: 0.9, y: 5.2, w: W - 1.8, h: 0.4, isTextBox: true, margin: 0,
+  x: 0.9, y: 5.9, w: W - 1.8, h: 0.4, isTextBox: true, margin: 0,
   fontFace: BODY, fontSize: 13, italic: true, color: MUTED, align: "center",
 });
 s.addNotes("If time allows, run the live demo now. Start the analysis, then keep talking. If anything misbehaves, the previous slide shows the same content.");
 
 // =================================================================
-// 17 — CLOSING THESIS
+// 18 — LIMITATIONS
+// =================================================================
+s = pres.addSlide();
+bg(s);
+headline(s, "The limits, stated plainly");
+chip(s, 18);
+{
+  const lims = [
+    ["ic_person", "37 subjects — one device, one language", "the dominant limitation; every result is reported with its spread"],
+    ["ic_mic", "vowel-defined measures on continuous speech", "jitter, shimmer and HNR are noisier here; CPPS compensates only partly"],
+    ["ic_gauge", "scores are not calibrated probabilities", "0.7 does not mean a 70% chance of disease — the wording enforces this"],
+    ["ic_search", "one external corpus — one data point", "0.701 AUC measures generalisation once; it does not characterise it"],
+  ];
+  const cw = 5.75, chh = 1.55, gapx = 0.5, gapy = 0.45;
+  lims.forEach(([icon, head, sub], idx) => {
+    const c = idx % 2, r = Math.floor(idx / 2);
+    const x = (W - 2 * cw - gapx) / 2 + c * (cw + gapx);
+    const y = 1.85 + r * (chh + gapy);
+    card(s, x, y, cw, chh);
+    iconCircle(s, x + 0.2, y + 0.24, 0.55, icon, MUTED);
+    s.addText(head, { x: x + 0.95, y: y + 0.14, w: cw - 1.15, h: 0.55, isTextBox: true, margin: 0, fontFace: HEAD, fontSize: 15, bold: true, color: ICE, align: "left", valign: "middle" });
+    s.addText(sub, { x: x + 0.95, y: y + 0.72, w: cw - 1.15, h: 0.75, isTextBox: true, margin: 0, fontFace: BODY, fontSize: 12, color: MUTED, align: "left" });
+  });
+}
+s.addText("Every limitation above is stated in the report itself — none is left for an examiner to discover.", {
+  x: 0.9, y: 5.75, w: W - 1.8, h: 0.5, isTextBox: true, margin: 0,
+  fontFace: HEAD, fontSize: 16, italic: true, color: ICE, align: "center",
+});
+s.addNotes("Before I close: the limits, stated plainly. Thirty-seven subjects, one device, one language. The classic voice measures were designed for vowels, not continuous speech. The scores are not probabilities. And one external corpus is one data point about generalisation. All of this is written in the report itself.");
+
+// =================================================================
+// 19 — CLOSING THESIS
 // =================================================================
 s = pres.addSlide();
 bg(s);
 headline(s, "What this is — and is not");
-chip(s, 17);
+chip(s, 19);
 {
   const nots = [
     "not a diagnostic tool; many conditions change a voice",
@@ -661,15 +751,15 @@ s.addText([
   x: 0.9, y: 4.85, w: W - 1.8, h: 0.5, isTextBox: true, margin: 0,
   fontFace: HEAD, fontSize: 19, italic: true, align: "center",
 });
-waveform(s, 6.15, 1.0, HONEST);
+heroWave(s, 6.35, 1.15);
 s.addNotes("To close. This is not a diagnostic tool. Thirty-seven subjects is small. But the central lesson is this. Validation design moves the number more than model engineering does. An honest 0.822 is worth more than an inflated one.");
 
 // =================================================================
 // 18 — THANK YOU
 // =================================================================
 s = pres.addSlide();
-bg(s);
-waveform(s, 5.9, 1.3, HONEST);
+bg(s, true);
+heroWave(s, 5.95, 1.55);
 s.addText("Thank you", {
   x: 0.9, y: 2.5, w: W - 1.8, h: 1.0, isTextBox: true, margin: 0,
   fontFace: HEAD, fontSize: 44, bold: true, color: ICE, align: "center",
@@ -734,7 +824,7 @@ backups.forEach(([q, bullets], bi) => {
   ], {
     x: 0.55, y: 0.4, w: W - 1.1, h: 0.8, isTextBox: true, margin: 0, fontFace: HEAD,
   });
-  chip(sb, 19 + bi);
+  chip(sb, 21 + bi);
   let y = 2.2;
   bullets.forEach((b) => {
     sb.addText([{ text: "▪  ", options: { color: HONEST } }, { text: b, options: { color: ICE } }], {

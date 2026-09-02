@@ -1,0 +1,286 @@
+% =====================================================================
+% دليل شرائح العرض slides_v3.pptx — شرح بالعربية لكل شريحة
+% Compile with: xelatex slides_v3_guide_ar.tex   (run twice)
+% =====================================================================
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[left=2.2cm,top=2.4cm,right=2.2cm,bottom=2.4cm]{geometry}
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setmainlanguage{arabic}
+\setotherlanguage{english}
+\newfontfamily\arabicfont[Script=Arabic,Scale=1.20]{Traditional Arabic}
+\newfontfamily\englishfont[Scale=0.92]{Times New Roman}
+
+\usepackage{enumitem}
+\setlist[itemize]{leftmargin=*,topsep=3pt,itemsep=2pt,parsep=0pt}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+
+\renewcommand{\baselinestretch}{1.35}
+\setlength{\parskip}{5pt}
+\setlength{\parindent}{0pt}
+
+\newcommand{\E}[1]{\textenglish{\texttt{#1}}}
+\newcommand{\N}[1]{\textenglish{#1}}
+% slide heading: number + title + target time
+\newcommand{\slayd}[3]{%
+  \par\vspace{10pt}\hrule\vspace{8pt}%
+  {\large\textbf{الشريحة #1 — #2}}\hfill{\small\textit{الزمن التقريبي: #3}}\par\vspace{4pt}%
+}
+\newcommand{\fiha}{\textbf{شنو فيها: }}
+\newcommand{\managementhaha}{\textbf{شنو معناها: }}
+\newcommand{\tqul}{\textbf{شنو تقول: }}
+% the English sentence to read aloud
+\newcommand{\bilinglizi}[1]{\par\textbf{بالإنجليزية:}\par
+  \begin{english}\small\itshape #1\end{english}\par}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{\small دليل شرائح العرض}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\begin{document}
+
+% ---------------- title ---------------------------------------
+\thispagestyle{empty}
+\begin{center}
+\vspace*{2.2cm}
+{\Huge\textbf{دليل شرائح العرض}}\par
+\vspace{0.9cm}
+{\LARGE شرح كل شريحة، وماذا تقول عندها}\par
+\vspace{1.6cm}
+{\large الملف: \E{report/defence/slides\_v3.pptx} — \N{17} شريحة}\par
+\vspace{0.5cm}
+{\large سهيل محمد الحمالي — ربيع \N{2026}}\par
+\vspace{2.0cm}
+\begin{minipage}{0.85\textwidth}
+\small
+ملاحظة: الجُمل الإنجليزية في هذا الدليل هي نفسها المكتوبة داخل ملف العرض
+في ملاحظات المتحدّث (افتح \E{View} ثم \E{Notes Page} في
+\E{PowerPoint}). تدرّب بالعربية لتفهم، وألقِ بالإنجليزية كما هي مكتوبة —
+جُمل قصيرة سهلة النطق.
+\end{minipage}
+\end{center}
+\clearpage
+
+\slayd{\N{1}}{الغلاف (داكنة)}{\N{0:30}}
+\fiha أيقونة ميكروفون في دائرة ذهبية، والعنوان، واسمك بالذهبي، وبيانات
+الجامعة.
+\par\tqul حيّي اللجنة وقدّم نفسك والعنوان. لا تُطل هنا.
+\bilinglizi{Good morning. My name is Suhail. This is my graduation
+project about the voice and Parkinson's disease.}
+
+\slayd{\N{2}}{\N{01} السؤال: برنامج واحد، سؤال واحد}{\N{1:00}}
+\fiha بطاقة كبيرة فيها سؤال المشروع («مرضى باركنسون» بالذهبي و«أصحّاء»
+بالبنفسجي)، وثلاث بطاقات: \N{37} شخصاً، \N{74} رقماً، ليس تشخيصاً.
+\par\managementhaha هذه الشريحة تختصر المشروع كلّه: البرنامج يستمع لتسجيل
+ويجيب هل نمطه أقرب للمرضى أم للأصحّاء.
+\par\tqul اقرأ السؤال ببطء، ثم علّق على البطاقات الثلاث، وشدّد على «ليس
+تشخيصاً» من أول دقيقة — هذا يحميك من أصعب سؤال لاحقاً.
+\bilinglizi{One program, one question. Does this voice pattern look more
+like patients, or like healthy people? It is not a diagnosis. It is a
+screening helper.}
+
+\slayd{\N{3}}{\N{02} الصوت: باركنسون يصل إلى الصوت}{\N{1:00}}
+\fiha سلسلة ثلاث بطاقات: دماغ (دوبامين أقل) ثم عضلات (تحكّم أضعف) ثم
+كلام (أخفض وأكثر رتابة وأقل ثباتاً)، ورقم \N{90}٪ كبير بالذهبي، وجملة:
+«الضعف الذي يهزّ اليد يحرّك الصوت أيضاً».
+\par\managementhaha الجسر المنطقي: مرض حركي في الدماغ، فكيف وصل للصوت؟
+لأن الكلام عضلات أيضاً.
+\par\tqul امشِ على السلسلة بطاقة بطاقة، ثم اختم بالجملة الأخيرة — هي
+أقوى جملة في العرض، قلها ببطء.
+\bilinglizi{Parkinson's starts in the brain. Less dopamine. The muscles
+lose fine control. Also the small muscles of speech. Ninety percent of
+patients get voice changes. The weakness that shakes a hand also moves
+the voice.}
+
+\slayd{\N{4}}{\N{02} كيف يُصنع الصوت: ثلاث مراحل}{\N{1:00}}
+\fiha ثلاث بطاقات بأيقونات: رئتان (تدفعان الهواء = الطاقة)، حبال صوتية
+(تهتزّ بسرعة = النغمة)، فم ولسان (يشكّلان الصوت = الحروف)، وتشبيه الآلة
+الموسيقية.
+\par\managementhaha قبل أن نقيس الصوت يجب أن نفهم كيف يُصنع — وباركنسون
+يستطيع إفساد كل مرحلة من الثلاث.
+\bilinglizi{A voice is made in three stages. The lungs push the air. The
+vocal folds vibrate very fast --- that is the pitch. The mouth and
+tongue shape the sound into letters. Like a musical instrument.}
+
+\slayd{\N{5}}{\N{03} من الهواء إلى الكهرباء إلى أرقام}{\N{1:15}}
+\fiha سلسلة: ميكروفون ثم كهرباء ثم \E{ADC}، وتحتها رسم توضيحي: موجة
+ناعمة بنفسجية (تناظرية) ثم أعمدة ذهبية منفصلة (العيّنات)، وسطر:
+«\N{44{,}100} رقماً في كل ثانية».
+\par\managementhaha جواب «كيف يسمع الحاسوب؟»: الموجة تضرب الميكروفون
+فتصير إشارة كهربائية، والمحوّل \E{ADC} يقيسها \N{44{,}100} مرة في
+الثانية — كل قياس رقم واحد اسمه عيّنة.
+\par\tqul أشر على الرسم: «هذه الموجة الأصلية، وهذه القياسات». وأضف:
+تسجيل دقيقتين يساوي نحو \N{5} ملايين رقم.
+\bilinglizi{The sound wave hits the microphone. It becomes an electrical
+signal. The ADC measures it 44,100 times every second. Each measurement
+is one number. A two-minute recording becomes about five million
+numbers.}
+
+\slayd{\N{6}}{\N{03} قناة واحدة، لا شيء يضيع}{\N{0:50}}
+\fiha بطاقتان: \E{Mono} (قناة واحدة = قائمة أرقام واحدة) و\E{WAV}
+(يحفظ كل رقم كما سُجّل)، وشريط: لماذا لا \E{MP3}؟
+\par\managementhaha \E{MP3} يضغط بحذف التفاصيل الصغيرة التي لا تسمعها
+الأذن — لكن مقاييسنا تعيش في تلك التفاصيل بالذات.
+\bilinglizi{Mono: one channel, one list of numbers. WAV keeps every
+number exactly as recorded. Why not MP3? MP3 deletes small details to
+save space --- and the small details are exactly what we measure.}
+
+\slayd{\N{7}}{\N{04} البيانات: أصوات حقيقية فُحصت قبل الاستخدام}{\N{1:00}}
+\fiha أربع بطاقات أرقام: \N{37} شخصاً، \N{21}/\N{16} سليم/مريض،
+\N{73} تسجيلاً، نحو دقيقتين لكل تسجيل بالهاتف. ثم اسم المجموعة
+\E{MDVR-KCL} وشريط «فُحصت قبل التدريب».
+\par\tqul اذكر أنها مجموعة بحثية عامّة من كلية الملك في لندن (مصداقية)،
+وأن كل شخص قرأ نصاً وأجرى محادثة — كلام عادي. وشدّد على الفحص المسبق:
+التسميات، هوية المتحدّث، لا تكرار، لا ملفات تالفة.
+\bilinglizi{Our data is MDVR-KCL, a public research dataset from King's
+College London. Thirty-seven people. Seventy-three recordings on a
+phone. And we checked every file before training.}
+
+\slayd{\N{8}}{\N{05} خمس خطوات تنظيف — ورفض واحد}{\N{1:00}}
+\fiha خمس بطاقات بأيقونات: قناة واحدة، \N{44.1} كيلوهرتز، إزالة
+الانزياح، قصّ الصمت من الأطراف فقط، توحيد الصوت. وتحتها بطاقة تحذير
+بعلامة منع حمراء: «لم نُزل الضجيج».
+\par\managementhaha أهم ما فيها هو الرفض: برامج إزالة الضجيج تنعّم عدم
+الانتظام الصغير — وعدم الانتظام هو الدليل الطبي نفسه. لو نظّفنا الصوت
+لبدا المريض سليماً.
+\par\tqul مرّ على الخطوات الخمس بسرعة، وقف عند التحذير الأحمر واشرحه —
+نقطة تُظهر نضجاً علمياً وسيحبّها الأساتذة.
+\bilinglizi{Five careful cleaning steps. And one refusal: we did not
+remove noise. Noise removal smooths away the small irregularities ---
+but those irregularities are the medical evidence.}
+
+\slayd{\N{9}}{\N{06} القياس: \N{74} رقماً، كل رقم يجيب سؤالاً}{\N{1:15}}
+\fiha خمسة صفوف، كل صفّ: سؤال بسيط ثم اسم القياس ثم السبب الطبي:
+\begin{itemize}
+  \item هل النبرة مسطّحة أم حيوية؟ — \E{pitch range} — الرتابة علامة
+        كلاسيكية.
+  \item هل الاهتزاز ثابت؟ — \E{jitter \& shimmer} — التحكّم المرتجف
+        يجعله متفاوتاً.
+  \item هل الصوت صافٍ أم مهموس؟ — \E{HNR} — الحبال الضعيفة تسرّب الهواء.
+  \item هل التوقّفات كثيرة؟ — \E{pause statistics} — بدء الكلام يصير
+        أصعب.
+  \item ما سرعة حركة الفم؟ — \E{MFCC} — الحركات الصغيرة البطيئة تشوّش
+        الحروف.
+\end{itemize}
+\tqul اقرأ الأسئلة لا المصطلحات. والرسالة الختامية: كل رقم وراءه سبب
+طبي، لم نختر شيئاً عشوائياً.
+\bilinglizi{Seventy-four numbers. Each answers a simple question. Is the
+pitch flat or lively? Is the vibration steady? Is the voice clear or
+breathy? Every number has a medical reason behind it.}
+
+\slayd{\N{10}}{\N{07} التدريب والاختبار — وقاعدة ذهبية}{\N{1:00}}
+\fiha بطاقتان: \E{TRAINING} (نعرض تسجيلات كثيرة مع الأجوبة فيجد النمط)
+و\E{TESTING} (أشخاص جدد بلا أجوبة — هل ما زال يميّز؟)، وشريط القاعدة
+الذهبية: «لا تختبر أبداً على شخص تدرّب عليه الحاسوب — الطالب الذي رأى
+أسئلة الامتحان لا يُثبت شيئاً».
+\par\managementhaha هذه الشريحة تحضير للشريحة القادمة — أهم شريحة. تزرع
+الفكرة قبل الأرقام.
+\par\tqul اشرح المرحلتين ببساطة، واختم بجملة: «هذه القاعدة هي قلب
+مشروعنا — والشريحة التالية تُظهر لماذا».
+\bilinglizi{Training: many recordings with answers. Testing: new people,
+no answers. Golden rule: never test on a person the computer trained on.
+This rule is the heart of our project. The next slide shows why.}
+
+\slayd{\N{11}}{أهم شريحة في المشروع (داكنة)}{\N{1:30}}
+\fiha شاشة داكنة درامية عنوانها «أهم شريحة في هذا المشروع». يسار:
+\N{0.909} ضخم بالذهبي — «الطريقة الخاطئة: اختبار على أصوات سمعها الحاسوب
+جزئياً». يمين: \N{0.775} بالأبيض — «الطريقة الأمينة: أشخاص لم يسمعهم
+أبداً». وتحت: «الفرق هو حفظ الأشخاص، لا كشف المرض».
+\par\textbf{الحركة:} عند دخول الشريحة يظهر \N{0.909} وحده، والجانب
+الأمين لا يظهر إلا بنقرتك. استغل هذا: دع اللجنة تنظر إلى \N{0.909}
+ثانيتين، قل «يبدو ممتازاً، صح؟»، ثم انقر.
+\par\managementhaha نفس البيانات ونفس النموذج، تغيّر التقسيم فقط، فقفز
+الرقم من \N{0.775} إلى \N{0.909}. الفرق ليس ذكاءً بل حفظاً. وهذا يفسّر
+نتائج \N{95}٪ فأكثر المنشورة، ويجعل رقمك الأقل هو الأصدق.
+\bilinglizi{Same data. Same model. Only the split changed. The wrong
+way: 0.909 --- looks amazing. [Click] The honest way: 0.775. The
+difference is memorising people, not detecting disease. Our number is
+honest.}
+
+\slayd{\N{12}}{\N{08} نموذجنا: غابة من \N{300} قرار صغير}{\N{1:00}}
+\fiha ثلاث أيقونات أشجار، ثم \E{Random Forest}: \N{300} شجرة قرار تنظر
+إلى الأرقام الـ\N{74} ثم تصوّت. وبطاقتان: «لماذا هذا النموذج؟ لأننا
+نستطيع سؤاله أي الأرقام استخدم» و«رقمه المفضّل؟ مدى النبرة — علامة
+الرتابة التي يعرفها الأطباء».
+\par\managementhaha نقطتان قويتان: النموذج قابل للتفسير، واكتشف بنفسه
+العلامة السريرية المعروفة دون أن يُلقَّن طبّاً.
+\bilinglizi{Our model is a Random Forest. Three hundred small decision
+trees look at the numbers, then they vote. We can ask it which numbers
+it used. Its favourite is pitch range --- the monotone sign doctors
+already know.}
+
+\slayd{\N{13}}{\N{09} النتائج بكلام بسيط}{\N{1:00}}
+\fiha ثلاث بطاقات: \N{0.822} الدقّة المتوازنة (النتيجة العادلة على أشخاص
+لم يسمعهم)، \N{77}٪ الحساسية (من كل المرضى الحقيقيين، كم التقطنا؟)،
+\N{87}٪ النوعية (من كل الأصحّاء، كم برّأنا؟). وشريط النموذج الكسول.
+\par\tqul اشرح كل رقم بسؤاله البسيط. وجملة النموذج الكسول («يقول دائماً
+سليم فيحصل على \N{57.5}٪ ولا يجد أي مريض») ستُضحك اللجنة وتوصل الفكرة
+معاً.
+\bilinglizi{Balanced accuracy 0.822 --- on people it never heard.
+Sensitivity 77 percent: of all true patients, how many did we catch?
+Specificity 87 percent. Why not plain accuracy? A lazy model that always
+says healthy scores 57.5 percent --- and finds zero patients.}
+
+\slayd{\N{14}}{\N{09} مصفوفة الالتباس: كل تسجيل محسوب}{\N{1:00}}
+\fiha جدول \N{2}×\N{2}: \N{36} صحيح (بنفسجي) و\N{6} إنذار كاذب (أحمر)
+في صفّ الأصحّاء، و\N{7} فائت (أحمر) و\N{24} مُلتقَط (بنفسجي) في صفّ
+المرضى. وعلى الجانب: «من \N{73} تسجيلاً: \N{60} صحيحة و\N{13} خطأ — كل
+أداة فرز تخطئ، والأدوات الأمينة تَعُدّ أخطاءها».
+\par\tqul اقرأ الخانات الأربع بالكلمات البسيطة المكتوبة تحتها، ثم
+الخلاصة. ذكر الأخطاء بنفسك قوة لا ضعف — يمنع اللجنة من «اكتشافها».
+\bilinglizi{This table counts every recording. Thirty-six correctly
+cleared. Six false alarms. Seven missed. Twenty-four caught. Out of 73:
+60 correct, 13 mistakes. Every screening tool makes mistakes. Honest
+tools count them.}
+
+\slayd{\N{15}}{\N{10} الاختبار الصعب: بلد مختلف، نموذج مجمَّد}{\N{1:15}}
+\fiha ثلاث بطاقات: \N{61} متحدّثاً إيطالياً (لغة وميكروفونات وغرف
+مختلفة، والنموذج مجمَّد بلا إعادة تدريب)، \E{AUC} \N{0.701} (يرتّب
+المريض فوق السليم \N{70}٪ من المرات)، و«رفض أن يخمّن» (كل سليم كبير
+السنّ حصل على «لا أستطيع الجزم» بدل خطأ واثق). وجملة: «معرفة متى تقول
+لا أعرف جزء من الأمانة».
+\par\managementhaha أقوى دليل في المشروع: النموذج نُقل لبيئة أجنبية
+تماماً وبقيت فيه إشارة حقيقية، والأهم أنه امتنع عن التصنيف الخاطئ
+الواثق.
+\bilinglizi{The hardest test. Sixty-one Italian speakers. Different
+language, different microphones. The model was frozen. It still ranks a
+patient above a healthy person 70 percent of the time. And for every
+elderly healthy speaker it said: cannot tell. It refused to guess.}
+
+\slayd{\N{16}}{ثلاثة أشياء تتذكّرها (داكنة)}{\N{0:45}}
+\fiha ثلاث نقاط بدوائر ذهبية مرقّمة:
+\begin{itemize}
+  \item الصوت يحمل إشارة حقيقية قابلة للقياس لباركنسون.
+  \item اختبرنا بأمانة — فقط على أشخاص لم يسمعهم الحاسوب.
+  \item أداة مساعدة للفرز، ليست تشخيصاً — الطبيب هو من يقرّر.
+\end{itemize}
+وأسفلها: «رقم \N{0.822} الأمين أثمن من رقم مضخَّم».
+\par\tqul هذه خاتمتك. اقرأ الثلاث نقاط ببطء ووضوح — هي ما تريد أن يخرج
+به كل عضو لجنة من القاعة.
+\bilinglizi{Three things to remember. One: the voice carries a real,
+measurable signal. Two: we tested honestly. Three: it is a screening
+helper, not a diagnosis --- a doctor decides. An honest 0.822 is worth
+more than an inflated number.}
+
+\slayd{\N{17}}{شكراً (داكنة)}{\N{0:20}}
+\tqul اختم بثقة ثم توقّف وابتسم.
+\bilinglizi{Thank you. I welcome your questions.}
+
+% ---------------- final tips ---------------------------------------
+\par\vspace{12pt}\hrule\vspace{10pt}
+{\large\textbf{ثلاث نصائح أخيرة}}\par
+\begin{itemize}
+  \item المجموع التقريبي نحو \N{16} دقيقة بالحدود الزمنية أعلاه — تدرّب
+        بصوت مسموع مع مؤقّت ثلاث مرات على الأقل، وستنزل إلى \N{15}.
+  \item النقرة المهمة الوحيدة في الشريحة \N{11}: توقّف قبلها، ثم انقر.
+        تدرّب على هذه اللحظة تحديداً.
+  \item احفظ عن ظهر قلب جملتين فقط: جملة الافتتاح، وجملة الشريحة
+        \N{11}: \begin{english}\itshape Same data. Same model. Only the
+        split changed.\end{english} — الباقي يكفي أن تفهمه.
+\end{itemize}
+
+\end{document}

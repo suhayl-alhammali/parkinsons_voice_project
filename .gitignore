@@ -45,3 +45,6 @@ docs/*.toc
 # Office lock files
 ~$*
 **/~$*
+
+# node
+report/defence/node_modules/
